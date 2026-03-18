@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Select from "react-select";
-const API = import.meta.env.VITE_API_BASE_URL;
 console.log("API URL:", API);
 function BlobBg() {
   return (

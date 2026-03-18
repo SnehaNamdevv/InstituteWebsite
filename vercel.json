@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://institute-backend-0ncp.onrender.com/$1"
+    }
+  ]
+}

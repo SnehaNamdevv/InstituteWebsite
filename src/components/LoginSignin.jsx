@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Select from "react-select";
+const API = import.meta.env.VITE_API_BASE_URL;
+console.log("API URL:", API);
 function BlobBg() {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -79,8 +81,8 @@ export default function LoginSignin() {
   };
 
   useEffect(() => {
-    fetch("https://institute-backend-0ncp.onrender.com/institute/allInstitute")
-      .then(res => res.json())
+fetch(`${API}/institute/allInstitute`)
+    .then(res => res.json())
       .then(data => {
         setInstitutes(data.institutes); // correct key
       })
@@ -118,7 +120,7 @@ export default function LoginSignin() {
       if (mode === "signin") {
 
         const res = await fetch(
-          "https://institute-backend-0ncp.onrender.com/student/login",
+  `${API}/student/login`,
           {
             method: "POST",
             headers: {
@@ -155,7 +157,7 @@ export default function LoginSignin() {
       if (mode === "signup" && step === 2) {
 
         const res = await fetch(
-          "https://institute-backend-0ncp.onrender.com/student/register",
+  `${API}/student/register`,
           {
             method: "POST",
             headers: {

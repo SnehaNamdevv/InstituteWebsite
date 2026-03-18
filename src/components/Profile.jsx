@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Camera } from "lucide-react";
-
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://institute-backend-0ncp.onrender.com";
 export default function Profile({ dark, setActiveSection }) {
 
   const [student, setStudent] = useState(null);
@@ -10,7 +12,7 @@ export default function Profile({ dark, setActiveSection }) {
   const [message, setMessage] = useState("");
 
   const API =
-    "https://institute-backend-0ncp.onrender.com/student/allStudents";
+    `${BASE_URL}/student/allStudents`;
 
   useEffect(() => {
     fetchStudent();
@@ -41,7 +43,7 @@ export default function Profile({ dark, setActiveSection }) {
     setMessage("Updating profile...");
 
     const res = await fetch(
-      `https://institute-backend-0ncp.onrender.com/student/updateStudent/${student.studentID}`,
+`${BASE_URL}/student/updateStudent/${student.studentID}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

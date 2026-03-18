@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-
+const API = import.meta.env.VITE_API_BASE_URL || "https://institute-backend-0ncp.onrender.com";
 const TOTAL_SECONDS = 120;
 
 // ── Step indicators ──────────────────────────────────────────────
@@ -135,7 +135,7 @@ function StepEmail({ onNext }) {
 
   try {
     const res = await fetch(
-      "https://institute-backend-0ncp.onrender.com/student/forget-password",
+`${API}/student/forget-password`,
       {
         method: "POST",
         headers: {
@@ -239,7 +239,7 @@ function StepVerify({ email, onNext, onBack }) {
 
  const handleResend = async () => {
   await fetch(
-    "https://institute-backend-0ncp.onrender.com/student/forget-password",
+   `${API}/student/verify-otp` ,
     {
       method: "POST",
       headers: {
@@ -259,7 +259,7 @@ const handleVerify = async () => {
 
   try {
     const res = await fetch(
-      "https://institute-backend-0ncp.onrender.com/student/verify-otp",
+`${API}/student/reset-password`,
       {
         method: "POST",
         headers: {

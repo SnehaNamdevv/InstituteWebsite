@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Select from "react-select";
-console.log("API URL:", API);
+const API = "https://institute-backend-0ncp.onrender.com";
 function BlobBg() {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -119,16 +119,16 @@ fetch(`${API}/institute/allInstitute`)
       if (mode === "signin") {
 
         const res = await fetch(
-  `${API}/student/login`,
+  "https://institute-backend-0ncp.onrender.com/student/login",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: form.email,
-              password: form.password,
-            }),
+  email: form.email,
+  password: form.password,
+}),
           }
         );
 
@@ -156,7 +156,7 @@ fetch(`${API}/institute/allInstitute`)
       if (mode === "signup" && step === 2) {
 
         const res = await fetch(
-  `${API}/student/register`,
+    "https://institute-backend-0ncp.onrender.com/student/register",
           {
             method: "POST",
             headers: {

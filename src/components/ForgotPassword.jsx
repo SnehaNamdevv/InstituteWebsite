@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-const API = import.meta.env.VITE_API_BASE_URL || "https://institute-backend-0ncp.onrender.com";
+
 const TOTAL_SECONDS = 120;
 
 // ── Step indicators ──────────────────────────────────────────────
@@ -135,7 +135,7 @@ function StepEmail({ onNext }) {
 
   try {
     const res = await fetch(
-`${API}/student/forget-password`,
+"https://institute-backend-0ncp.onrender.com/student/forget-password",
       {
         method: "POST",
         headers: {
@@ -239,7 +239,7 @@ function StepVerify({ email, onNext, onBack }) {
 
  const handleResend = async () => {
   await fetch(
-   `${API}/student/verify-otp` ,
+   "https://institute-backend-0ncp.onrender.com/student/verify-otp",
     {
       method: "POST",
       headers: {
@@ -258,19 +258,20 @@ const handleVerify = async () => {
   if (otpCode.length < 6) return;
 
   try {
-    const res = await fetch(
-`${API}/student/reset-password`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          otp: otpCode,
-        }),
-      }
-    );
+  
+const res = await fetch(
+  "https://institute-backend-0ncp.onrender.com/student/verify-otp",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: email,
+      otp: otpCode,
+    }),
+  }
+);
 
     const data = await res.json();
 

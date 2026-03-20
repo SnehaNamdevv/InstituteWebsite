@@ -215,7 +215,7 @@ fetch(`${API}/institute/allInstitute`)
   const pwMeta = [null, { label: "Weak", color: "#f87171" }, { label: "Good", color: "#fb923c" }, { label: "Strong", color: "#34d399" }];
 
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,600;0,700;1,500&display=swap');
+ 
  
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
  
@@ -288,12 +288,12 @@ fetch(`${API}/institute/allInstitute`)
  
     .left-hero { position:relative; z-index:1; }
     .left-headline {
-      font-family:'Fraunces',serif;
+      
       font-size:38px; font-weight:700;
       color:white; line-height:1.15;
       margin-bottom:16px;
     }
-    .left-headline em { font-style:italic; font-weight:500; opacity:0.85; }
+    .left-headline em {  font-weight:500; opacity:0.85; }
     .left-desc { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.7; max-width:280px; }
  
     .feat-list { position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; }
@@ -345,7 +345,7 @@ fetch(`${API}/institute/allInstitute`)
     }
     .tab-btn {
       flex:1; height:38px; border:none; cursor:pointer;
-      border-radius:11px; font-family:'Plus Jakarta Sans',sans-serif;
+      border-radius:11px; 
       font-size:13px; font-weight:600;
       transition:all 0.25s cubic-bezier(.34,1.56,.64,1);
       background:transparent; color:#9ca3af; letter-spacing:0.2px;
@@ -357,7 +357,6 @@ fetch(`${API}/institute/allInstitute`)
  
     .greeting { margin-bottom:24px; }
     .greeting-title {
-      font-family:'Fraunces',serif;
       font-size:26px; font-weight:700; color:#111827; line-height:1.2;
       margin-bottom:4px;
     }
@@ -416,7 +415,6 @@ fetch(`${API}/institute/allInstitute`)
     .btn-main {
       width:100%; height:50px;
       border:none; border-radius:14px; cursor:pointer;
-      font-family:'Plus Jakarta Sans',sans-serif;
       font-size:14px; font-weight:700; letter-spacing:0.3px;
       color:white;
       background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
@@ -435,7 +433,6 @@ fetch(`${API}/institute/allInstitute`)
     .btn-back {
       flex:1; height:50px; border:1.5px solid #e5e7eb;
       border-radius:14px; cursor:pointer; background:white;
-      font-family:'Plus Jakarta Sans',sans-serif;
       font-size:14px; font-weight:600; color:#6b7280;
       transition:all 0.2s;
     }
@@ -445,7 +442,6 @@ fetch(`${API}/institute/allInstitute`)
       width:100%; height:48px;
       border:1.5px solid #e5e7eb; border-radius:13px;
       background:white; cursor:pointer;
-      font-family:'Plus Jakarta Sans',sans-serif;
       font-size:13px; font-weight:600; color:#374151;
       display:flex; align-items:center; justify-content:center; gap:10px;
       transition:all 0.2s;
@@ -465,7 +461,6 @@ fetch(`${API}/institute/allInstitute`)
     }
     .switch-link {
       background:none; border:none; cursor:pointer;
-      font-family:'Plus Jakarta Sans',sans-serif;
       font-size:13px; font-weight:700; color:#6366f1;
       text-decoration:none; transition:opacity 0.2s;
     }
@@ -608,7 +603,7 @@ fetch(`${API}/institute/allInstitute`)
 
             <div className="greeting">
               <div className="greeting-title">
-                {mode === "signin" ? "Welcome back 👋" : step === 1 ? "Join the campus 🎓" : "Secure your account 🔐"}
+                {mode === "signin" ? "Welcome back 🖐️" : step === 1 ? "Join the campus 🎓" : "Secure your account 🔐"}
               </div>
               <div className="greeting-sub">
                 {mode === "signin" ? "Sign in to your student portal" : step === 1 ? "Tell us a bit about yourself" : "Create a strong password"}

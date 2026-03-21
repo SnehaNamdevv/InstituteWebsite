@@ -70,7 +70,7 @@ export default function LoginSignin() {
   const [institutes, setInstitutes] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
-  const [loginType, setLoginType] = useState("student"); // student or parent
+  const [loginType, setLoginType] = useState(); // student or parent
 
   const set = (key) => (e) => {
     const value = key === "remember" ? e.target.checked : e.target.value;
@@ -91,6 +91,7 @@ fetch(`${API}/institute/allInstitute`)
   }, []);
   const navigate = useNavigate();
   const [form, setForm] = useState({
+    loginType: "student",
   firstName: "",
   email: "",
   contactNo: "",
@@ -619,7 +620,7 @@ const loginBody = form.email
             {/* SIGN IN */}
             {mode === "signin" && (
 <form key={`signin-${animKey}`} className="form-slide" onSubmit={handleSubmit}>
-  {message && (
+  {/* {message && (
     <div
       style={{
         background: error ? "#fee2e2" : "#ecfdf5",
@@ -634,7 +635,7 @@ const loginBody = form.email
     >
       {message}
     </div>
-  )}
+  )} */}
 
   {/* Login Type */}
   <div className="form-group">

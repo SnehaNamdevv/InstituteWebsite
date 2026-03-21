@@ -70,6 +70,8 @@ export default function LoginSignin() {
   const [institutes, setInstitutes] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+  const [loginType, setLoginType] = useState("student"); // student or parent
+
   const set = (key) => (e) => {
     const value = key === "remember" ? e.target.checked : e.target.value;
 
@@ -89,16 +91,17 @@ fetch(`${API}/institute/allInstitute`)
   }, []);
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    firstName: "",
-    email: "",
-    contactNo: "",
-    dob: "",
-    address: "",
-    instituteName: "",
-    password: "",
-    confirm: "",
-    remember: false
-  });
+  firstName: "",
+  email: "",
+  contactNo: "",
+  dob: "",
+  address: "",
+  instituteName: "",
+  password: "",
+  confirm: "",
+  remember: false,
+  parentContactNo: "",
+});
 
   const switchMode = m => { setMode(m); setStep(1); setSuccess(false); setAnimKey(k => k + 1); };
 
@@ -117,6 +120,9 @@ fetch(`${API}/institute/allInstitute`)
 
       // ================= LOGIN =================
       if (mode === "signin") {
+const loginBody = form.email 
+  ? { email: form.email, password: form.password }  // student login
+  : { parentContactNo: form.parentContactNo, dob: form.dob }; // parent login
 
         const res = await fetch(
   "https://institute-backend-0ncp.onrender.com/student/login",
@@ -612,288 +618,370 @@ fetch(`${API}/institute/allInstitute`)
 
             {/* SIGN IN */}
             {mode === "signin" && (
+<form key={`signin-${animKey}`} className="form-slide" onSubmit={handleSubmit}>
+  {message && (
+    <div
+      style={{
+        background: error ? "#fee2e2" : "#ecfdf5",
+        border: `1px solid ${error ? "#f87171" : "#34d399"}`,
+        color: error ? "#b91c1c" : "#065f46",
+        padding: "10px 14px",
+        borderRadius: "10px",
+        fontSize: "13px",
+        marginBottom: "14px",
+        fontWeight: "500"
+      }}
+    >
+      {message}
+    </div>
+  )}
 
-              <form key={`signin-${animKey}`} className="form-slide" onSubmit={handleSubmit}>
-                {message && (
-                  <div
-                    style={{
-                      background: error ? "#fee2e2" : "#ecfdf5",
-                      border: `1px solid ${error ? "#f87171" : "#34d399"}`,
-                      color: error ? "#b91c1c" : "#065f46",
-                      padding: "10px 14px",
-                      borderRadius: "10px",
-                      fontSize: "13px",
-                      marginBottom: "14px",
-                      fontWeight: "500"
-                    }}
-                  >
-                    {message}
-                  </div>
-                )}
-                <div className={`form-group${focused === "em" ? " is-focused" : ""}`}>
-                  <label className="form-label">Student Email</label>
-                  <div className="input-wrap">
-                    <span className="input-icon">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                    </span>
-                    <input className="form-input has-icon" type="email" placeholder="you@apexinstitute.edu"
-                      value={form.email} onChange={set("email")}
-                      onFocus={() => setFocused("em")} onBlur={() => setFocused("")} required />
-                  </div>
-                </div>
+  {/* Login Type */}
+  <div className="form-group">
+    <label className="form-label">Login as</label>
+    <select
+      className="form-input"
+      value={form.loginType}
+      onChange={(e) => setForm({ ...form, loginType: e.target.value })}
+    >
+      <option value="student">Student</option>
+      <option value="parent">Parent</option>
+    </select>
+  </div>
 
-                <div className={`form-group${focused === "pw" ? " is-focused" : ""}`}>
-         <Link
-  to="/forgot-password"
-  style={{ color: "#6366f1", fontWeight: "600", textDecoration: "none" }}
->
-  Forgot password?
-</Link>
-                  <div className="input-wrap">
-                    <span className="input-icon">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
-                    </span>
-                    <input className="form-input has-icon" type={showPass ? "text" : "password"} placeholder="Enter your password"
-                      value={form.password} onChange={set("password")}
-                      onFocus={() => setFocused("pw")} onBlur={() => setFocused("")} required />
-                    <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}><EyeIcon open={showPass} /></button>
-                  </div>
-                </div>
+  {/* Conditional Fields */}
+  {form.loginType === "student" ? (
+    <>
+      {/* Student Email */}
+      <div className={`form-group${focused === "em" ? " is-focused" : ""}`}>
+        <label className="form-label">Student Email</label>
+        <div className="input-wrap">
+          <span className="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+          </span>
+          <input
+            className="form-input has-icon"
+            type="email"
+            placeholder="you@apexinstitute.edu"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onFocus={() => setFocused("em")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
+      </div>
 
-                <div className="remember-row">
-                  <label className="check-wrap">
-                    <input type="checkbox" checked={form.remember} onChange={set("remember")} />
-                    <span>Remember me</span>
-                  </label>
-                </div>
+      {/* Student Password */}
+      <div className={`form-group${focused === "pw" ? " is-focused" : ""}`}>
+        <Link
+          to="/forgot-password"
+          style={{ color: "#6366f1", fontWeight: "600", textDecoration: "none" }}
+        >
+          Forgot password?
+        </Link>
+        <div className="input-wrap">
+          <span className="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+          </span>
+          <input
+            className="form-input has-icon"
+            type={showPass ? "text" : "password"}
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onFocus={() => setFocused("pw")}
+            onBlur={() => setFocused("")}
+            required
+          />
+          <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}><EyeIcon open={showPass} /></button>
+        </div>
+      </div>
+    </>
+  ) : (
+    <>
+      {/* Parent Contact No */}
+      <div className={`form-group${focused === "pc" ? " is-focused" : ""}`}>
+        <label className="form-label">Parent Contact No.</label>
+        <div className="input-wrap">
+          <input
+            className="form-input"
+            type="tel"
+            placeholder="Enter contact no"
+            value={form.parentContactNo}
+            onChange={(e) => setForm({ ...form, parentContactNo: e.target.value })}
+            onFocus={() => setFocused("pc")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
+      </div>
 
-                <button type="submit" className="btn-main">
-                  Sign In <ArrowRight />
-                </button>
+      {/* Parent DOB */}
+      <div className={`form-group${focused === "dob" ? " is-focused" : ""}`}>
+        <label className="form-label">Date of Birth</label>
+        <div className="input-wrap">
+          <input
+            className="form-input"
+            type="date"
+            value={form.dob}
+            onChange={(e) => setForm({ ...form, dob: e.target.value })}
+            onFocus={() => setFocused("dob")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
+      </div>
+    </>
+  )}
 
-                <div className="or-row">or</div>
+  {/* Remember Me */}
+  <div className="remember-row">
+    <label className="check-wrap">
+      <input type="checkbox" checked={form.remember} onChange={(e) => setForm({ ...form, remember: e.target.checked })} />
+      <span>Remember me</span>
+    </label>
+  </div>
 
-                <button type="button" className="btn-google">
-                  <svg width="17" height="17" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
-                  Continue with Google
-                </button>
+  {/* Submit */}
+  <button type="submit" className="btn-main">
+    Sign In <ArrowRight />
+  </button>
 
-                <p className="switch-txt">
-                  Don't have an account?{" "}
-                  <button type="button" className="switch-link" onClick={() => switchMode("signup")}>Register here</button>
-                </p>
-              </form>
+  <div className="or-row">or</div>
+
+  {/* Google Login */}
+  <button type="button" className="btn-google">
+    {/* Google SVG Icon */}
+    Continue with Google
+  </button>
+
+  <p className="switch-txt">
+    Don't have an account?{" "}
+    <button type="button" className="switch-link" onClick={() => switchMode("signup")}>Register here</button>
+  </p>
+</form>
             )}
 
-            {/* SIGN UP */}
-            {mode === "signup" && (
-              <form key={`signup-${step}-${animKey}`} className="form-slide" onSubmit={handleSubmit}>
-                {/* Steps */}
-                <div className="steps-row">
-                  <div className="step-item">
-                    <div className={`step-circle${step === 1 ? " active" : step > 1 ? " done" : ""}`}>
-                      {step > 1 ? <CheckIcon /> : "1"}
-                    </div>
-                    <div className={`step-name${step >= 1 ? " active" : ""}`}>Profile</div>
-                  </div>
-                  <div className="step-connector" style={{ marginTop: 15 }}>
-                    <div className="step-connector-fill" style={{ width: step > 1 ? "100%" : "0%" }} />
-                  </div>
-                  <div className="step-item">
-                    <div className={`step-circle${step === 2 ? " active" : ""}`}>2</div>
-                    <div className={`step-name${step === 2 ? " active" : ""}`}>Security</div>
-                  </div>
-                </div>
+          {/* SIGN UP */}
+{mode === "signup" && (
+  <form key={`signup-${step}-${animKey}`} className="form-slide" onSubmit={handleSubmit}>
+    {/* Steps */}
+    <div className="steps-row">
+      <div className="step-item">
+        <div className={`step-circle${step === 1 ? " active" : step > 1 ? " done" : ""}`}>
+          {step > 1 ? <CheckIcon /> : "1"}
+        </div>
+        <div className={`step-name${step >= 1 ? " active" : ""}`}>Profile</div>
+      </div>
+      <div className="step-connector" style={{ marginTop: 15 }}>
+        <div className="step-connector-fill" style={{ width: step > 1 ? "100%" : "0%" }} />
+      </div>
+      <div className="step-item">
+        <div className={`step-circle${step === 2 ? " active" : ""}`}>2</div>
+        <div className={`step-name${step === 2 ? " active" : ""}`}>Security</div>
+      </div>
+    </div>
 
-                {step === 1 && (
-                  <>
-                    <div className="two-col">
+    {/* Step 1: Profile */}
+    {step === 1 && (
+      <>
+        <div className="two-col">
+          {/* Full Name */}
+          <div className={`form-group${focused === "fn" ? " is-focused" : ""}`}>
+            <label className="form-label">Full Name</label>
+            <input
+              className="form-input"
+              type="text"
+              placeholder="xyz"
+              value={form.firstName}
+              onChange={set("firstName")}
+              onFocus={() => setFocused("fn")}
+              onBlur={() => setFocused("")}
+              required
+            />
+          </div>
 
-                      {/* Full Name */}
-                      <div className={`form-group${focused === "fn" ? " is-focused" : ""}`}>
-                        <label className="form-label">Full Name</label>
-                        <input
-                          className="form-input"
-                          type="text"
-                          placeholder="xyz"
-                          value={form.firstName}
-                          onChange={set("firstName")}
-                          onFocus={() => setFocused("fn")}
-                          onBlur={() => setFocused("")}
-                          required
-                        />
-                      </div>
+          {/* Contact Number */}
+          <div className={`form-group${focused === "contact" ? " is-focused" : ""}`}>
+            <label className="form-label">Contact Number</label>
+            <input
+              className="form-input"
+              type="tel"
+              placeholder="987XXXXXXX"
+              value={form.contactNo}
+              onChange={set("contactNo")}
+              onFocus={() => setFocused("contact")}
+              onBlur={() => setFocused("")}
+              required
+            />
+          </div>
+        </div>
 
-                      {/* Contact Number */}
-                      <div className={`form-group${focused === "contact" ? " is-focused" : ""}`}>
-                        <label className="form-label">Contact Number</label>
-                        <input
-                          className="form-input"
-                          type="tel"
-                          placeholder="987XXXXXX"
-                          value={form.contactNo}
-                          onChange={set("contactNo")}
-                          onFocus={() => setFocused("contact")}
-                          onBlur={() => setFocused("")}
-                          required
-                        />
-                      </div>
+        {/* Date of Birth */}
+        <div className={`form-group${focused === "dob" ? " is-focused" : ""}`}>
+          <label className="form-label">Date of Birth</label>
+          <input
+            className="form-input"
+            type="date"
+            value={form.dob}
+            onChange={set("dob")}
+            onFocus={() => setFocused("dob")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
 
-                    </div>
+        {/* Address */}
+        <div className={`form-group${focused === "address" ? " is-focused" : ""}`}>
+          <label className="form-label">Address</label>
+          <input
+            className="form-input"
+            type="text"
+            placeholder="Enter your address"
+            value={form.address}
+            onChange={set("address")}
+            onFocus={() => setFocused("address")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
 
+        {/* Student Email */}
+        <div className={`form-group${focused === "studentEmail" ? " is-focused" : ""}`}>
+          <label className="form-label">Email</label>
+          <div className="input-wrap">
+            <span className="input-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </span>
+            <input
+              className="form-input has-icon"
+              type="email"
+              placeholder="you@gmail.com"
+              value={form.email}
+              onChange={set("email")}
+              onFocus={() => setFocused("studentEmail")}
+              onBlur={() => setFocused("")}
+              required
+            />
+          </div>
+        </div>
 
-                    {/* Date of Birth */}
-                    <div className={`form-group${focused === "dob" ? " is-focused" : ""}`}>
-                      <label className="form-label">Date of Birth</label>
-                      <input
-                        className="form-input"
-                        type="date"
-                        value={form.dob}
-                        onChange={set("dob")}
-                        onFocus={() => setFocused("dob")}
-                        onBlur={() => setFocused("")}
-                        required
-                      />
-                    </div>
+        {/* Parent Contact No */}
+        <div className={`form-group${focused === "pc" ? " is-focused" : ""}`}>
+          <label className="form-label">Parent Contact No.</label>
+          <input
+            className="form-input"
+            type="tel"
+            placeholder="Enter contact no"
+            value={form.parentContactNo}
+            onChange={set("parentContactNo")}
+            onFocus={() => setFocused("pc")}
+            onBlur={() => setFocused("")}
+            required
+          />
+        </div>
 
+        {/* Institute */}
+        <div className={`form-group${focused === "inst" ? " is-focused" : ""}`}>
+          <label className="form-label">Institute</label>
+          <Select
+            placeholder="Search Institute..."
+            options={institutes.map((inst) => ({
+              value: inst.name,
+              label: `${inst.name} (${inst.city})`
+            }))}
+            value={
+              institutes
+                .map((inst) => ({
+                  value: inst.name,
+                  label: `${inst.name} (${inst.city})`
+                }))
+                .find((opt) => opt.value === form.instituteName)
+            }
+            onChange={(selected) =>
+              setForm({ ...form, instituteName: selected.value })
+            }
+            onFocus={() => setFocused("inst")}
+            onBlur={() => setFocused("")}
+            isSearchable
+          />
+        </div>
 
-                    {/* Address */}
-                    <div className={`form-group${focused === "address" ? " is-focused" : ""}`}>
-                      <label className="form-label">Address</label>
-                      <input
-                        className="form-input"
-                        type="text"
-                        placeholder="Enter your address"
-                        value={form.address}
-                        onChange={set("address")}
-                        onFocus={() => setFocused("address")}
-                        onBlur={() => setFocused("")}
-                        required
-                      />
-                    </div>
-                    <div className={`form-group${focused === "studentEmail" ? " is-focused" : ""}`}>
-                      <label className="form-label">Student Email</label>
-                      <div className="input-wrap">
-                        <span className="input-icon">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                            <polyline points="22,6 12,13 2,6" />
-                          </svg>
-                        </span>
+        <button type="submit" className="btn-main">Continue <ArrowRight /></button>
+      </>
+    )}
 
-                        <input
-                          className="form-input has-icon"
-                          type="email"
-                          placeholder="you@gmail.com"
-                          value={form.email}
-                          onChange={set("email")}
-                          onFocus={() => setFocused("studentEmail")}
-                          onBlur={() => setFocused("")}
-                          required
-                        />
-                      </div>
-                    </div>
+    {/* Step 2: Security */}
+    {step === 2 && (
+      <>
+        {/* Password */}
+        <div className={`form-group${focused === "pw" ? " is-focused" : ""}`}>
+          <label className="form-label">Create Password</label>
+          <div className="input-wrap">
+            <span className="input-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+            </span>
+            <input
+              className="form-input has-icon"
+              type={showPass ? "text" : "password"}
+              placeholder="Minimum 8 characters"
+              value={form.password}
+              onChange={set("password")}
+              onFocus={() => setFocused("pw")}
+              onBlur={() => setFocused("")}
+              required
+              minLength={8}
+            />
+            <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}><EyeIcon open={showPass} /></button>
+          </div>
+        </div>
 
-                    <div className={`form-group${focused === "inst" ? " is-focused" : ""}`}>
-                      <label className="form-label">Institute</label>
+        {/* Confirm Password */}
+        <div className={`form-group${focused === "cf" ? " is-focused" : ""}`}>
+          <label className="form-label">Confirm Password</label>
+          <div className="input-wrap">
+            <span className="input-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+            </span>
+            <input
+              className="form-input has-icon"
+              type={showConfirm ? "text" : "password"}
+              placeholder="Repeat password"
+              value={form.confirm}
+              onChange={set("confirm")}
+              onFocus={() => setFocused("cf")}
+              onBlur={() => setFocused("")}
+              required
+            />
+            <button type="button" className="eye-btn" onClick={() => setShowConfirm(!showConfirm)}><EyeIcon open={showConfirm} /></button>
+          </div>
+          {form.confirm && form.confirm !== form.password && (
+            <div className="mismatch-txt">Passwords do not match</div>
+          )}
+        </div>
 
-                      <Select
-                        placeholder="Search Institute..."
+        <div className="terms-note">
+          By creating an account, you agree to Apex Institute's <a>Terms of Service</a> and <a>Privacy Policy</a>.
+        </div>
 
-                        options={institutes.map((inst) => ({
-                          value: inst.name,
-                          label: `${inst.name} (${inst.city})`
-                        }))}
+        <div className="btn-row">
+          <button type="button" className="btn-back" onClick={() => setStep(1)}>← Back</button>
+          <button type="submit" className="btn-main" style={{ flex: 2 }}>Create Account <ArrowRight /></button>
+        </div>
+      </>
+    )}
 
-                        value={
-                          institutes
-                            .map((inst) => ({
-                              value: inst.name,
-                              label: `${inst.name} (${inst.city})`
-                            }))
-                            .find((opt) => opt.value === form.instituteName)
-                        }
-
-                        onChange={(selected) =>
-                          setForm({ ...form, instituteName: selected.value })
-                        }
-
-                        onFocus={() => setFocused("inst")}
-                        onBlur={() => setFocused("")}
-                        isSearchable
-                      />
-                    </div>
-
-
-                    <button type="submit" className="btn-main">Continue <ArrowRight /></button>
-                  </>
-                )}
-
-                {step === 2 && (
-                  <>
-                    <div className={`form-group${focused === "pw" ? " is-focused" : ""}`}>
-                      <label className="form-label">Create Password</label>
-                      <div className="input-wrap">
-                        <span className="input-icon">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
-                        </span>
-                        <input className="form-input has-icon" type={showPass ? "text" : "password"} placeholder="Minimum 8 characters"
-                          value={form.password} onChange={set("password")}
-                          onFocus={() => setFocused("pw")} onBlur={() => setFocused("")} required minLength={8} />
-                        <button type="button" className="eye-btn" onClick={() => setShowPass(!showPass)}><EyeIcon open={showPass} /></button>
-                      </div>
-                      {form.password && (
-                        <div className="pw-meter">
-                          {[1, 2, 3].map(i => (
-                            <div key={i} className="pw-seg" style={{ background: pw >= i ? pwMeta[pw]?.color : "#f3f4f6" }} />
-                          ))}
-                          <span className="pw-lbl" style={{ color: pw > 0 ? pwMeta[pw]?.color : "#d1d5db" }}>
-                            {pwMeta[pw]?.label || ""}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className={`form-group${focused === "cf" ? " is-focused" : ""}`}>
-                      <label className="form-label">Confirm Password</label>
-                      <div className="input-wrap">
-                        <span className="input-icon">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                        </span>
-                        <input className="form-input has-icon" type={showConfirm ? "text" : "password"} placeholder="Repeat password"
-                          value={form.confirm} onChange={set("confirm")}
-                          onFocus={() => setFocused("cf")} onBlur={() => setFocused("")} required />
-                        <button type="button" className="eye-btn" onClick={() => setShowConfirm(!showConfirm)}><EyeIcon open={showConfirm} /></button>
-                      </div>
-                      {form.confirm && form.confirm !== form.password && (
-                        <div className="mismatch-txt">Passwords do not match</div>
-                      )}
-                    </div>
-
-                    <div className="terms-note">
-                      By creating an account, you agree to Apex Institute's{" "}
-                      <a>Terms of Service</a> and <a>Privacy Policy</a>.
-                    </div>
-
-                    <div className="btn-row">
-                      <button type="button" className="btn-back" onClick={() => setStep(1)}>← Back</button>
-                      <button type="submit" className="btn-main" style={{ flex: 2 }}>Create Account <ArrowRight /></button>
-                    </div>
-                  </>
-                )}
-
-                <p className="switch-txt">
-                  Already have an account?{" "}
-                  <button type="button" className="switch-link" onClick={() => switchMode("signin")}>Sign in</button>
-                </p>
-              </form>
-            )}
+    <p className="switch-txt">
+      Already have an account?{" "}
+      <button type="button" className="switch-link" onClick={() => switchMode("signin")}>Sign in</button>
+    </p>
+  </form>
+)}
           </div>
         </div>
       </div>

@@ -85,7 +85,7 @@ export default function RightPanel({ dark, rightOpen }) {
               <div className="flex items-center gap-3">
 
                 <img
-                  src={`https://i.pravatar.cc/40?img=${i+20}`}
+                  src={`https:`}
                   className="w-8 h-8 rounded-full"
                 />
 

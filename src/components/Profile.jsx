@@ -73,7 +73,7 @@ export default function Profile({ dark, setActiveSection }) {
 
       {/* Profile Header */}
       <div
-        className={`rounded-xl p-6 shadow flex flex-col md:flex-row md:items-center md:justify-between
+        className={`rounded-xl p-4 shadow flex flex-col md:flex-row md:items-center md:justify-between
         ${dark ? "bg-slate-800 text-white" : "bg-white"}
         `}
       >

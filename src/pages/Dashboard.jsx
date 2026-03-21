@@ -7,7 +7,7 @@ import RightPanel from "../components/RightSidebar";
 import WelcomeCard from "../components/WelcomeCard";
 import DashboardStats from "../components/DashboardStats";
 import PerformanceChart from "../components/PerformanceChart";
-
+import Help from './Help';
 import Profile from "../components/Profile";
 import Settings from "./Settings";
 // import Settings from "../components/Settings";
@@ -16,7 +16,7 @@ const Messages = () => <div>📩 Messages</div>;
 const Notifications = () => <div>🔔 Notifications</div>;
 const Schedule = () => <div>📅 Schedule</div>;
 const Course = () => <div>📚 Course</div>;
-const Help = () => <div>❓ Help</div>;
+
 
 export default function Dashboard({ dark, toggleTheme }) {
 
@@ -57,7 +57,7 @@ export default function Dashboard({ dark, toggleTheme }) {
         return <Course />;
 
       case "Help":
-        return <Help />;
+        return <Help dark={dark}/>;
 
       case "Setting":
   return <Settings dark={dark} />;

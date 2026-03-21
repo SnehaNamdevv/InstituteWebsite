@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import LoginSignin from "./components/LoginSignin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./components/ForgotPassword";
+import StudentPortfolioCenter from "./pages/StudentPortfolio";
 
 // Placeholder pages
 const Messages = () => <div className="p-4">📩 Messages Section</div>;
@@ -20,37 +21,27 @@ export default function App() {
   return (
     <div className={dark ? "dark bg-[#020617]" : "bg-gray-100"}>
       <Router>
+        <Routes>
+<Route
+  path="/"
+  element={
+    <ProtectedRoute>
+      <Dashboard dark={dark} toggleTheme={toggleTheme} />
+    </ProtectedRoute>
+  }
+>
+  <Route path="dashboard" element={<div>🏠 Welcome to Dashboard</div>} />
+  <Route path="messages" element={<Messages />} />
+  <Route path="notifications" element={<Notifications />} />
+  <Route path="schedule" element={<Schedule />} />
+  <Route path="course" element={<Course />} />
+  <Route path="help" element={<Help />} />
+  <Route path="settings" element={<Settings dark={dark} />} />
 
-       <Routes>
-
-  {/* Login */}
-  <Route path="/login" element={<LoginSignin />} />
-
-  {/* Forgot Password */}
-  <Route path="/forgot-password" element={<ForgotPassword />} />
-
-  {/* Protected Dashboard */}
-  <Route
-    path="/"
-    element={
-      <ProtectedRoute>
-        <Dashboard dark={dark} toggleTheme={toggleTheme} />
-      </ProtectedRoute>
-    }
-  >
-    <Route path="dashboard" element={<div>🏠 Welcome to Dashboard</div>} />
-    <Route path="messages" element={<Messages />} />
-    <Route path="notifications" element={<Notifications />} />
-    <Route path="schedule" element={<Schedule />} />
-    <Route path="course" element={<Course />} />
-    <Route path="help" element={<Help />} />
-    <Route path="settings" element={<Settings />} />
-  </Route>
-
-  <Route path="*" element={<Navigate to="/login" />} />
-
+  {/* Student Portfolio nested route */}
+  <Route path="student-portfolio" element={<StudentPortfolioCenter dark={dark} />} />
+</Route>
 </Routes>
-
       </Router>
     </div>
   );

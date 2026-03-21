@@ -119,45 +119,50 @@ fetch(`${API}/institute/allInstitute`)
 
     try {
 
-      // ================= LOGIN =================
-      if (mode === "signin") {
-const loginBody = form.email 
-  ? { email: form.email, password: form.password }  // student login
-  : { parentContactNo: form.parentContactNo, dob: form.dob }; // parent login
-
-        const res = await fetch(
-  "https://institute-backend-0ncp.onrender.com/student/login",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-  email: form.email,
-  password: form.password,
-}),
-          }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-          setError(false);
-          setMessage("Login successful. Redirecting...");
-          setSuccess(true);
-          localStorage.setItem("auth", "true");
-          localStorage.setItem("student", JSON.stringify(data.student));
-
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1500);
-
-        } else {
-          setError(true);
-          setMessage(data.message || "Student not found");
-        }
-
+ // ================= LOGIN =================
+if (mode === "signin") {
+  try {
+    const res = await fetch(
+      "https://institute-backend-0ncp.onrender.com/student/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+        }),
       }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(true);
+      setMessage(data.message || "Login failed");
+      return;
+    }
+
+    // ✅ store student only
+    if (!data.student || !data.student.studentID) {
+      setError(true);
+      setMessage("Invalid student data from server");
+      return;
+    }
+
+    localStorage.setItem("student", JSON.stringify(data.student));
+
+    setError(false);
+    setMessage("Login successful. Redirecting...");
+    setTimeout(() => {
+      navigate("/dashboard"); // use react-router navigate
+    }, 1000);
+
+  } catch (err) {
+    console.error(err);
+    setError(true);
+    setMessage("Server error");
+  }
+}
 
       // ================= REGISTER =================
       if (mode === "signup" && step === 2) {

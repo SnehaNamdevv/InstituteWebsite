@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Lock, KeyRound } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function Settings({ dark }) {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-
+const navigate = useNavigate();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -111,25 +114,25 @@ export default function Settings({ dark }) {
           className={`cursor-pointer p-6 rounded-xl shadow hover:shadow-lg transition
           ${dark ? "bg-slate-700 text-white" : "bg-white text-gray-800"}`}
         >
-          <div className="flex items-center gap-4">
-            <div
-              className={`p-3 rounded-xl ${
-                dark ? "bg-indigo-600" : "bg-indigo-100"
-              }`}
-            >
-              <KeyRound
-                size={24}
-                className={`${dark ? "text-white" : "text-indigo-600"}`}
-              />
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-lg">Forgot Password</h3>
-              <p className="text-sm opacity-70">
-                Reset your password via email
-              </p>
-            </div>
-          </div>
+       {/* Student Portfolio */}
+<div
+  onClick={() => navigate("/student-portfolio")} // navigate to portfolio page
+  className={`cursor-pointer p-6 rounded-xl shadow hover:shadow-lg transition
+    ${dark ? "bg-slate-700 text-white" : "bg-white text-gray-800"}`}
+>
+  <div className="flex items-center gap-4">
+    {/* Updated icon */}
+    <div className={`p-3 rounded-xl ${dark ? "bg-green-600" : "bg-green-100"}`}>
+      <KeyRound size={24} className={`${dark ? "text-white" : "text-green-600"}`} />
+    </div>
+    <div>
+      <h3 className="font-semibold text-lg">Student Portfolio</h3>
+      <p className="text-sm opacity-70">
+        Fill your details and skills
+      </p>
+    </div>
+  </div>
+</div>
         </div>
       </div>
 

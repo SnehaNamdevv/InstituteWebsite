@@ -21,28 +21,33 @@ export default function App() {
   return (
     <div className={dark ? "dark bg-[#020617]" : "bg-gray-100"}>
       <Router>
-        <Routes>
-<Route
-  path="/"
-  element={
-    <ProtectedRoute>
-      <Dashboard dark={dark} toggleTheme={toggleTheme} />
-    </ProtectedRoute>
-  }
->
-  <Route path="dashboard" element={<div>🏠 Welcome to Dashboard</div>} />
-  <Route path="messages" element={<Messages />} />
-  <Route path="notifications" element={<Notifications />} />
-  <Route path="schedule" element={<Schedule />} />
-  <Route path="course" element={<Course />} />
-  <Route path="help" element={<Help />} />
-  <Route path="settings" element={<Settings dark={dark} />} />
+  <Routes>
 
-  {/* Student Portfolio nested route */}
-  <Route path="student-portfolio" element={<StudentPortfolioCenter dark={dark} />} />
-</Route>
-</Routes>
-      </Router>
+    {/* Public Routes */}
+    <Route path="/login" element={<LoginSignin />} />
+    <Route path="/forgot-password" element={<ForgotPassword />} />
+
+    {/* Protected Routes */}
+    <Route
+      path="/"
+      element={
+        <ProtectedRoute>
+          <Dashboard dark={dark} toggleTheme={toggleTheme} />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="dashboard" element={<div>🏠 Welcome to Dashboard</div>} />
+      <Route path="messages" element={<Messages />} />
+      <Route path="notifications" element={<Notifications />} />
+      <Route path="schedule" element={<Schedule />} />
+      <Route path="course" element={<Course />} />
+      <Route path="help" element={<Help />} />
+      <Route path="settings" element={<Settings dark={dark} />} />
+      <Route path="student-portfolio" element={<StudentPortfolioCenter dark={dark} />} />
+    </Route>
+
+  </Routes>
+</Router>
     </div>
   );
 }

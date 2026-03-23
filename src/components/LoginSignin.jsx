@@ -70,7 +70,9 @@ export default function LoginSignin() {
   const [institutes, setInstitutes] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
-  const [loginType, setLoginType] = useState(); // student or parent
+  const formData = new FormData();
+
+  const [loginType, setLoginType] = useState(); 
 
   const set = (key) => (e) => {
     const value = key === "remember" ? e.target.checked : e.target.value;
@@ -90,8 +92,8 @@ fetch(`${API}/institute/allInstitute`)
       .catch(err => console.log(err));
   }, []);
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    loginType: "student",
+ const [form, setForm] = useState({
+  loginType: "student",
   firstName: "",
   email: "",
   contactNo: "",
@@ -102,6 +104,10 @@ fetch(`${API}/institute/allInstitute`)
   confirm: "",
   remember: false,
   parentContactNo: "",
+
+  parentName: "",
+  parentOccupation: "",
+  parentRelation: "",
 });
 
   const switchMode = m => { setMode(m); setStep(1); setSuccess(false); setAnimKey(k => k + 1); };
@@ -126,11 +132,20 @@ if (mode === "signin") {
       "https://institute-backend-0ncp.onrender.com/student/login",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+          form.loginType === "student"
+            ? {
+                email: form.email,
+                password: form.password,
+              }
+            : {
+                parentContactNo: form.parentContactNo,
+                dob: form.dob,
+              }
+        ),
       }
     );
 
@@ -142,19 +157,15 @@ if (mode === "signin") {
       return;
     }
 
-    // ✅ store student only
-    if (!data.student || !data.student.studentID) {
-      setError(true);
-      setMessage("Invalid student data from server");
-      return;
-    }
-
+    // ✅ save token + student
+    localStorage.setItem("token", data.token);
     localStorage.setItem("student", JSON.stringify(data.student));
 
     setError(false);
     setMessage("Login successful. Redirecting...");
+
     setTimeout(() => {
-      navigate("/dashboard"); // use react-router navigate
+      navigate("/dashboard");
     }, 1000);
 
   } catch (err) {
@@ -174,15 +185,21 @@ if (mode === "signin") {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              fullName: form.firstName,
-              email: form.email,
-              contactNo: form.contactNo,
-              dob: form.dob,
-              address: form.address,
-              instituteName: form.instituteName,
-              password: form.password,
-            }),
+           body: JSON.stringify({
+  fullName: form.firstName,
+  email: form.email,
+  contactNo: form.contactNo,
+  dob: form.dob,
+  address: form.address,
+  instituteName: form.instituteName,
+  password: form.password,
+
+  // ✅ ADD THESE
+  parentName: form.parentName,
+  parentContactNo: form.parentContactNo,
+  parentOccupation: form.parentOccupation,
+  parentRelation: form.parentRelation,
+})
           }
         );
 
@@ -890,7 +907,53 @@ if (mode === "signin") {
             onBlur={() => setFocused("")}
             required
           />
+          
         </div>
+        <div className={`form-group${focused === "pn" ? " is-focused" : ""}`}>
+  <label className="form-label">Parent Name</label>
+  <input
+    className="form-input"
+    type="text"
+    placeholder="Enter parent name"
+    value={form.parentName}
+    onChange={set("parentName")}
+    onFocus={() => setFocused("pn")}
+    onBlur={() => setFocused("")}
+    required
+  />
+</div>
+
+{/* Parent Occupation */}
+<div className={`form-group${focused === "po" ? " is-focused" : ""}`}>
+  <label className="form-label">Parent Occupation</label>
+  <input
+    className="form-input"
+    type="text"
+    placeholder="e.g. Teacher / Business"
+    value={form.parentOccupation}
+    onChange={set("parentOccupation")}
+    onFocus={() => setFocused("po")}
+    onBlur={() => setFocused("")}
+  />
+</div>
+
+{/* Parent Relation */}
+<div className={`form-group${focused === "pr" ? " is-focused" : ""}`}>
+  <label className="form-label">Relation</label>
+  <select
+    className="form-input"
+    value={form.parentRelation}
+    onChange={set("parentRelation")}
+    onFocus={() => setFocused("pr")}
+    onBlur={() => setFocused("")}
+    required
+  >
+    <option value="">Select Relation</option>
+    <option value="Father">Father</option>
+    <option value="Mother">Mother</option>
+    <option value="Guardian">Guardian</option>
+  </select>
+</div>
 
         {/* Institute */}
         <div className={`form-group${focused === "inst" ? " is-focused" : ""}`}>

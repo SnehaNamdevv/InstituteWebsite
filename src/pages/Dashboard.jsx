@@ -10,6 +10,7 @@ import PerformanceChart from "../components/PerformanceChart";
 import Help from './Help';
 import Profile from "../components/Profile";
 import Settings from "./Settings";
+import StudentPortfolioCenter from "./StudentPortfolio";
 // import Settings from "../components/Settings";
 
 const Messages = () => <div>📩 Messages</div>;
@@ -60,7 +61,9 @@ export default function Dashboard({ dark, toggleTheme }) {
         return <Help dark={dark}/>;
 
       case "Setting":
-  return <Settings dark={dark} />;
+  return <Settings dark={dark} setActiveSection={setActiveSection} />;
+  case "StudentPortfolio":
+  return <StudentPortfolioCenter dark={dark} />;
 
       default:
         return <div>Not Found</div>;

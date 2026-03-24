@@ -11,12 +11,13 @@ import Help from './Help';
 import Profile from "../components/Profile";
 import Settings from "./Settings";
 import StudentPortfolioCenter from "./StudentPortfolio";
+import Course from "./Course";
 // import Settings from "../components/Settings";
 
 const Messages = () => <div>📩 Messages</div>;
 const Notifications = () => <div>🔔 Notifications</div>;
 const Schedule = () => <div>📅 Schedule</div>;
-const Course = () => <div>📚 Course</div>;
+
 
 
 export default function Dashboard({ dark, toggleTheme }) {
@@ -59,6 +60,8 @@ export default function Dashboard({ dark, toggleTheme }) {
 
       case "Help":
         return <Help dark={dark}/>;
+        case "course":
+          return <Course dark={dark}/>
 
       case "Setting":
   return <Settings dark={dark} setActiveSection={setActiveSection} />;

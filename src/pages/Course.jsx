@@ -1,4 +1,4 @@
-import React from "react";
+
 
 const courses = [
   {
@@ -80,6 +80,81 @@ export default function CourseGrid() {
               </button>
 
             </div>
+             {/* Content */}
+            <div className="p-4">
+              
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-indigo-600 transition">
+                {course.title}
+              </h3>
+
+              {/* Instructor */}
+              <p className="text-sm text-gray-500 mt-1">
+                {course.instructor}
+              </p>
+
+              {/* Classes Count */}
+              <p className="text-xs text-gray-400 mt-2">
+                {course.classes} Classes
+              </p>
+
+              {/* Button */}
+              <button className="mt-4 w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 transition">
+                Start Learning →
+              </button>
+
+            </div>
+
+ {/* Content */}
+            <div className="p-4">
+              
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-indigo-600 transition">
+                {course.title}
+              </h3>
+
+              {/* Instructor */}
+              <p className="text-sm text-gray-500 mt-1">
+                {course.instructor}
+              </p>
+
+              {/* Classes Count */}
+              <p className="text-xs text-gray-400 mt-2">
+                {course.classes} Classes
+              </p>
+
+              {/* Button */}
+              <button className="mt-4 w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 transition">
+                Start Learning →
+              </button>
+
+            </div>
+
+ {/* Content */}
+            <div className="p-4">
+              
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-indigo-600 transition">
+                {course.title}
+              </h3>
+
+              {/* Instructor */}
+              <p className="text-sm text-gray-500 mt-1">
+                {course.instructor}
+              </p>
+
+              {/* Classes Count */}
+              <p className="text-xs text-gray-400 mt-2">
+                {course.classes} Classes
+              </p>
+
+              {/* Button */}
+              <button className="mt-4 w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 transition">
+                Start Learning →
+              </button>
+
+            </div>
+
 
           </div>
         ))}

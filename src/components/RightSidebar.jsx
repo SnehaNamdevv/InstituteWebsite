@@ -8,17 +8,19 @@ export default function RightPanel({
   setActiveSection       
 }) {
 
+  // ✅ Meetings
   const meetings = [
     { title: "Team Meeting", time: "10:30 AM", color: "bg-pink-500" },
     { title: "Project Review", time: "1:00 PM", color: "bg-yellow-500" }
   ];
 
+  // ✅ States
   const [institutes, setInstitutes] = useState([]);
   const [showJoinInstituteModal, setShowJoinInstituteModal] = useState(false);
-  localStorage.setItem("courses", JSON.stringify(data.courses || []));
   const [selectedInstitute, setSelectedInstitute] = useState(null);
   const [instituteCode, setInstituteCode] = useState("");
 
+  // ✅ Fetch Institutes
   useEffect(() => {
     fetch("https://institute-backend-0ncp.onrender.com/institute/allInstitute")
       .then(res => res.json())
@@ -26,10 +28,19 @@ export default function RightPanel({
       .catch(err => console.log(err));
   }, []);
 
+  // ✅ Restore Courses after reload
+  useEffect(() => {
+    const savedCourses = JSON.parse(localStorage.getItem("courses"));
+    if (savedCourses && savedCourses.length > 0) {
+      setInstituteCourses(savedCourses);
+    }
+  }, []);
+
   const activeInstitutes = institutes.filter(
     inst => inst.status === "active"
   );
 
+  // ✅ Assignments
   const assignments = [
     { name: "React Dashboard UI", due: "Tomorrow" },
     { name: "Database ER Diagram", due: "2 Days" }
@@ -89,7 +100,6 @@ export default function RightPanel({
                 <p className="text-sm opacity-60">No active institutes</p>
               ) : (
                 activeInstitutes.map((inst, i) => (
-                  
                   <div
                     key={i}
                     onClick={() => {
@@ -100,8 +110,7 @@ export default function RightPanel({
                   >
 
                     <div className="flex items-center gap-3">
-
-                      {/* Logo / Initial */}
+                      {/* Logo */}
                       {inst.logo ? (
                         <img
                           src={
@@ -128,7 +137,6 @@ export default function RightPanel({
                     </span>
 
                   </div>
-
                 ))
               )}
             </div>
@@ -162,7 +170,7 @@ export default function RightPanel({
         </div>
       </div>
 
-      {/* 🔥 JOIN INSTITUTE MODAL */}
+      {/* JOIN INSTITUTE MODAL */}
       {showJoinInstituteModal && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -192,30 +200,30 @@ export default function RightPanel({
 
             <div className="flex gap-2">
               <button
-onClick={async () => {
-  try {
-    const res = await fetch(
-      `https://institute-backend-0ncp.onrender.com/api/courses/institute/${encodeURIComponent(instituteCode)}`
-    );
+                onClick={async () => {
+                  try {
+                    const res = await fetch(
+                      `https://institute-backend-0ncp.onrender.com/api/courses/institute/${encodeURIComponent(instituteCode)}`
+                    );
 
-    const data = await res.json();
+                    const data = await res.json();
 
-    console.log("Courses:", data);
+                    console.log("Courses:", data);
 
-    setInstituteCourses(data.courses || []);
+                    setInstituteCourses(data.courses || []);
 
-   
-    localStorage.setItem("courses", JSON.stringify(data.courses || []));
+                    // ✅ Save for reload
+                    localStorage.setItem("courses", JSON.stringify(data.courses || []));
 
-    setActiveSection("Course");
+                    setActiveSection("Course");
 
-    setShowJoinInstituteModal(false);
-    setInstituteCode("");
+                    setShowJoinInstituteModal(false);
+                    setInstituteCode("");
 
-  } catch (err) {
-    console.log(err);
-  }
-}}
+                  } catch (err) {
+                    console.log(err);
+                  }
+                }}
                 className="flex-1 py-2 bg-indigo-600 text-white rounded-lg"
               >
                 Join

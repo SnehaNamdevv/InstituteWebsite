@@ -24,17 +24,39 @@ export default function Courses({ dark, instituteCourses = [] }) {
   const [classCode, setClassCode] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
-
+useEffect(() => {
+  const saved = localStorage.getItem("courses");
+  if (saved) {
+    setCourses(JSON.parse(saved));
+  }
+}, []);
   useEffect(() => {
     setCourses(instituteCourses || []);
   }, [instituteCourses]);
 
-  const handleJoinClass = () => {
-    if (classCode.length < 5) return;
-    console.log("Joining course with code:", classCode);
+const handleJoinClass = async () => {
+  if (classCode.length < 5) return;
+
+  try {
+    const res = await fetch(
+      `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(classCode)}`
+    );
+    const data = await res.json();
+    const newCourses = data.course ? [data.course] : data.courses || [];
+
+    // Merge with existing courses in localStorage
+    const existing = JSON.parse(localStorage.getItem("courses")) || [];
+    const mergedCourses = [...existing, ...newCourses];
+
+    setCourses(mergedCourses);
+    localStorage.setItem("courses", JSON.stringify(mergedCourses));
+
     setShowJoinModal(false);
     setClassCode("");
-  };
+  } catch (err) {
+    console.log("Error:", err);
+  }
+};
 
   const getTopicIcon = (type) => {
     switch (type) {

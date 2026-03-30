@@ -24,7 +24,7 @@ export default function Dashboard({ dark, toggleTheme }) {
 
   const [instituteCourses, setInstituteCourses] = useState([]);
 
-  // ✅ LOAD COURSES ON RELOAD
+  // ✅ LOAD DATA ON RELOAD
   useEffect(() => {
     const savedCourses = localStorage.getItem("courses");
     if (savedCourses) {
@@ -44,10 +44,12 @@ export default function Dashboard({ dark, toggleTheme }) {
         );
 
       case "Course":
-        return <Course dark={dark} instituteCourses={instituteCourses} />;
+        return (
+          <Course dark={dark} instituteCourses={instituteCourses} />
+        );
 
       case "Profile":
-        return <Profile dark={dark} />;
+        return <Profile dark={dark} setActiveSection={setActiveSection} />;
 
       case "Messages":
         return <Messages />;
@@ -73,9 +75,8 @@ export default function Dashboard({ dark, toggleTheme }) {
   };
 
   return (
-    <div className={`h-screen flex overflow-hidden ${dark ? "bg-slate-900" : "bg-gray-50"}`}>
-
-      {/* LEFT SIDEBAR */}
+    <div className={`flex h-screen ${dark ? "bg-slate-900" : "bg-white"}`}>
+      
       <Sidebar
         sidebarOpen={sidebarOpen}
         dark={dark}
@@ -83,10 +84,8 @@ export default function Dashboard({ dark, toggleTheme }) {
         setActiveSection={setActiveSection}
       />
 
-      {/* MAIN SECTION */}
-      <div className="flex flex-col flex-1">
-
-        {/* TOPBAR */}
+      <div className="flex flex-1 flex-col">
+        
         <Topbar
           dark={dark}
           toggleTheme={toggleTheme}
@@ -95,47 +94,19 @@ export default function Dashboard({ dark, toggleTheme }) {
           setRightOpen={setRightOpen}
         />
 
-        {/* CONTENT AREA */}
-        <div className="flex flex-1 overflow-hidden">
-
-          {/* CENTER CONTENT */}
-         <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 scroll-smooth mt-16 xl:mt-0">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
   {renderContent()}
 </div>
-
-          {/* RIGHT PANEL (DESKTOP FIXED WIDTH) */}
-          <div className="hidden xl:block w-80 border-l">
-            <RightPanel
-              dark={dark}
-              rightOpen={true}   // always visible on desktop
-              setRightOpen={setRightOpen}
-              setInstituteCourses={setInstituteCourses}
-              setActiveSection={setActiveSection}
-            />
-          </div>
-
-        </div>
       </div>
 
-      {/* MOBILE RIGHT PANEL OVERLAY */}
-      {rightOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/40 z-40 xl:hidden"
-            onClick={() => setRightOpen(false)}
-          />
-
-          <div className="fixed right-0 top-0 h-full w-80 z-50 xl:hidden">
-            <RightPanel
-              dark={dark}
-              rightOpen={rightOpen}
-              setRightOpen={setRightOpen}
-              setInstituteCourses={setInstituteCourses}
-              setActiveSection={setActiveSection}
-            />
-          </div>
-        </>
-      )}
+      {/* Right Panel */}
+      <RightPanel
+        dark={dark}
+        rightOpen={rightOpen}
+        setRightOpen={setRightOpen}
+        setInstituteCourses={setInstituteCourses}
+        setActiveSection={setActiveSection}
+      />
     </div>
   );
 }

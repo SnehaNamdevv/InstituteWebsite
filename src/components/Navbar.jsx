@@ -1,6 +1,6 @@
 import { Menu, Sun, Moon } from "lucide-react";
 import { PanelRight } from "lucide-react";
-export default function Topbar({ dark, toggleTheme, sidebarOpen, setSidebarOpen }) {
+export default function Topbar({ dark, toggleTheme, sidebarOpen, setSidebarOpen,setRightOpen    }) {
 
   return (
 
@@ -21,6 +21,12 @@ export default function Topbar({ dark, toggleTheme, sidebarOpen, setSidebarOpen 
       <button onClick={toggleTheme}>
         {dark ? <Sun size={20}/> : <Moon size={20}/>}
       </button>
+     <button
+  onClick={() => setRightOpen(true)}
+  className="lg:hidden p-2 rounded-lg  "
+>
+ <PanelRight size={22} />
+</button>
 
     </div>
 

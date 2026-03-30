@@ -7,7 +7,8 @@ export default function Courses({ dark }) {
   const [classCode, setClassCode] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  
+  const [showJoinInstituteModal, setShowJoinInstituteModal] = useState(false);
+const [instituteCode, setInstituteCode] = useState("");
   const [courses, setCourses] = useState([
     { 
       id: 1, 
@@ -108,13 +109,27 @@ export default function Courses({ dark }) {
           <h2 className="text-xl font-semibold">📚 My Classrooms</h2>
           <p className="text-sm opacity-70">Access your enrolled courses</p>
         </div>
-        <button 
-          onClick={() => setShowJoinModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all active:scale-95"
-        >
-          <Plus size={18} />
-          <span className="hidden sm:inline">Join Class</span>
-        </button>
+   <div className="flex gap-3">
+
+  {/* Join Class */}
+  <button 
+    onClick={() => setShowJoinModal(true)}
+    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+  >
+    <Plus size={18} />
+    <span className="hidden sm:inline">Join Class</span>
+  </button>
+
+  {/* 🔥 Join Institute */}
+  <button 
+    onClick={() => setShowJoinInstituteModal(true)}
+    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+  >
+    <Plus size={18} />
+    <span className="hidden sm:inline">Join Institute</span>
+  </button>
+
+</div>
       </div>
 
       {/* Course Grid */}

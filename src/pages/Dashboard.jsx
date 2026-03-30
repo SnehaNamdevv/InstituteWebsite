@@ -21,7 +21,7 @@ const Schedule = () => <div>📅 Schedule</div>;
 export default function Dashboard({ dark, toggleTheme }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
-
+const [rightOpen, setRightOpen] = useState(false);
   const renderContent = () => {
     switch (activeSection) {
       case "Dashboard":
@@ -100,11 +100,12 @@ export default function Dashboard({ dark, toggleTheme }) {
         
         {/* Topbar */}
         <Topbar
-          dark={dark}
-          toggleTheme={toggleTheme}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
+  dark={dark}
+  toggleTheme={toggleTheme}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setRightOpen={setRightOpen}   // ✅ ADD THIS
+/>
 
         {/* Scrollable Content (Scrollbar Hidden) */}
         <div className="flex-1 overflow-y-auto scroll-smooth no-scrollbar pt-20 lg:pt-5 px-4 sm:px-6 lg:px-8 space-y-6">
@@ -114,7 +115,13 @@ export default function Dashboard({ dark, toggleTheme }) {
       </div>
 
       {/* Right Panel */}
-      <RightPanel dark={dark} />
+    {rightOpen && (
+  <div
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm xl:hidden z-40"
+    onClick={() => setRightOpen(false)}
+  />
+)}
+      <RightPanel dark={dark} rightOpen={rightOpen} setRightOpen={setRightOpen} />
     </div>
   );
 }

@@ -134,7 +134,6 @@ export default function Settings({ dark ,setActiveSection }) {
 </div>
         
       </div>
-
       {/* UPDATE PASSWORD MODAL */}
       {showUpdateModal && (
         <div

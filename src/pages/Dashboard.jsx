@@ -13,6 +13,7 @@ import Settings from "./Settings";
 import StudentPortfolioCenter from "./StudentPortfolio";
 import Course from "./Course";
 
+
 const Messages = () => <div>📩 Messages</div>;
 const Notifications = () => <div>🔔 Notifications</div>;
 const Schedule = () => <div>📅 Schedule</div>;
@@ -62,6 +63,7 @@ export default function Dashboard({ dark, toggleTheme }) {
             setActiveSection={setActiveSection}
           />
         );
+       
 
       case "StudentPortfolio":
         return <StudentPortfolioCenter dark={dark} />;

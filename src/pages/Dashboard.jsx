@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Navbar";
@@ -22,6 +22,14 @@ export default function Dashboard({ dark, toggleTheme }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
 const [rightOpen, setRightOpen] = useState(false);
+const [instituteCourses, setInstituteCourses] = useState([]);
+useEffect(() => {
+  const savedCourses = localStorage.getItem("courses");
+
+  if (savedCourses) {
+    setInstituteCourses(JSON.parse(savedCourses));
+  }
+}, []);
   const renderContent = () => {
     switch (activeSection) {
       case "Dashboard":
@@ -51,7 +59,7 @@ const [rightOpen, setRightOpen] = useState(false);
         return <Schedule />;
 
       case "Course":
-        return <Course dark={dark} />;
+  return <Course dark={dark} instituteCourses={instituteCourses} />;
 
       case "Help":
         return <Help dark={dark} />;
@@ -115,13 +123,19 @@ const [rightOpen, setRightOpen] = useState(false);
       </div>
 
       {/* Right Panel */}
-    {rightOpen && (
+ {rightOpen && (
   <div
-    className="fixed inset-0 bg-black/50 backdrop-blur-sm xl:hidden z-40"
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm xl:hidden z-[60]"
     onClick={() => setRightOpen(false)}
   />
 )}
-      <RightPanel dark={dark} rightOpen={rightOpen} setRightOpen={setRightOpen} />
+<RightPanel 
+  dark={dark} 
+  rightOpen={rightOpen} 
+  setRightOpen={setRightOpen}
+  setInstituteCourses={setInstituteCourses}   // ✅ ADD THIS
+  setActiveSection={setActiveSection}         // ✅ ADD THIS
+/>
     </div>
   );
 }

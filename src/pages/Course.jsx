@@ -1,274 +1,429 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BookOpen, ArrowRight, X, ChevronLeft, FileText, Video, Link as LinkIcon } from "lucide-react";
+import { Plus, BookOpen, ArrowRight, X, ChevronLeft, FileText, Video, Link as LinkIcon, Search, Star, Clock, Users, Sparkles, GraduationCap, ChevronRight } from "lucide-react";
 
-const HEADER_COLORS = [
-  "from-blue-700 to-blue-900",
-  "from-green-700 to-green-900",
-  "from-orange-600 to-orange-800",
-  "from-red-700 to-red-900",
-  "from-purple-700 to-purple-900",
-  "from-teal-600 to-teal-800",
+const COURSE_THEMES = [
+  { bg: "from-violet-600 via-purple-600 to-indigo-700", accent: "#7c3aed", light: "#ede9fe", text: "#5b21b6", dot: "bg-violet-400" },
+  { bg: "from-rose-500 via-pink-600 to-red-700", accent: "#e11d48", light: "#ffe4e6", text: "#9f1239", dot: "bg-rose-400" },
+  { bg: "from-amber-500 via-orange-500 to-red-500", accent: "#f59e0b", light: "#fef3c7", text: "#92400e", dot: "bg-amber-400" },
+  { bg: "from-emerald-500 via-teal-500 to-cyan-600", accent: "#10b981", light: "#d1fae5", text: "#065f46", dot: "bg-emerald-400" },
+  { bg: "from-blue-500 via-cyan-500 to-teal-600", accent: "#3b82f6", light: "#dbeafe", text: "#1e3a8a", dot: "bg-blue-400" },
+  { bg: "from-fuchsia-600 via-pink-600 to-rose-500", accent: "#c026d3", light: "#fae8ff", text: "#701a75", dot: "bg-fuchsia-400" },
 ];
 
-const STATUS_STYLES = {
-  active:   "bg-blue-50 text-blue-700",
-  upcoming: "bg-green-50 text-green-700",
-  archived: "bg-orange-50 text-orange-700",
+const STATUS_CONFIG = {
+  active:   { label: "Active",    color: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
+  upcoming: { label: "Upcoming",  color: "bg-blue-100 text-blue-700 border border-blue-200" },
+  archived: { label: "Archived",  color: "bg-gray-100 text-gray-600 border border-gray-200" },
 };
 
 const getInitials = (name = "") =>
-  name.split(" ").map((w) => w[0]).slice(0, 2).join("");
+  name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
-export default function Courses({ dark, instituteCourses = [] }) {
+const TOPIC_ICON_CONFIG = {
+  Video:      { icon: Video,     bg: "bg-red-50",      color: "text-red-500",     label: "Video Lecture" },
+  Assignment: { icon: FileText,  bg: "bg-emerald-50",  color: "text-emerald-600", label: "Assignment" },
+  Link:       { icon: LinkIcon,  bg: "bg-blue-50",     color: "text-blue-500",    label: "Resource" },
+  Subject:    { icon: BookOpen,  bg: "bg-violet-50",   color: "text-violet-500",  label: "Subject" },
+};
+
+function TopicRow({ topic, index, dark }) {
+  const cfg = TOPIC_ICON_CONFIG[topic.type] || TOPIC_ICON_CONFIG.Subject;
+  const Icon = cfg.icon;
+  return (
+    <div
+      className="group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.01]"
+      style={{
+        background: dark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.9)",
+        border: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.06)",
+        boxShadow: dark ? "0 2px 12px rgba(0,0,0,0.3)" : "0 2px 12px rgba(0,0,0,0.04)",
+        animationDelay: `${index * 60}ms`,
+      }}
+    >
+      {/* Number */}
+      <span className="w-6 text-center text-xs font-bold opacity-25 shrink-0">{String(index + 1).padStart(2, '0')}</span>
+
+      {/* Icon */}
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
+        <Icon size={18} className={cfg.color} />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className={`font-semibold text-sm truncate transition-colors duration-200 group-hover:text-violet-500 ${dark ? "text-white" : "text-gray-800"}`}>
+          {topic.title}
+        </p>
+        <p className="text-xs opacity-50 mt-0.5">{cfg.label}</p>
+      </div>
+
+      {/* Arrow */}
+      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-violet-500/0 group-hover:bg-violet-500 transition-all duration-300 shrink-0">
+        <ChevronRight size={14} className="text-violet-400 group-hover:text-white transition-colors duration-300" />
+      </div>
+    </div>
+  );
+}
+
+function CourseCard({ course, index, dark, onClick }) {
+  const theme = COURSE_THEMES[index % COURSE_THEMES.length];
+  const initials = getInitials(course.instructor);
+  const status = course.status || "active";
+  const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+
+  return (
+    <div
+      onClick={onClick}
+      className="group rounded-2xl overflow-hidden cursor-pointer transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl"
+      style={{
+        background: dark ? "rgba(255,255,255,0.05)" : "#fff",
+        border: dark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.07)",
+        boxShadow: dark ? "0 4px 24px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.06)",
+      }}
+    >
+      {/* Banner */}
+      <div className={`relative h-32 bg-gradient-to-br ${theme.bg} p-5 overflow-hidden`}>
+        {/* Decorative blobs */}
+        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+        <div className="absolute bottom-0 left-1/3 w-16 h-16 rounded-full bg-white/10 blur-lg" />
+
+
+        {/* Course name */}
+        <div className="relative z-10 pr-14">
+          <p className="text-white/60 text-[10px] font-semibold uppercase tracking-widest mb-1">{course.courseId}</p>
+          <h3 className="text-white font-bold text-base leading-tight line-clamp-2">{course.name}</h3>
+        </div>
+
+        {/* Avatar */}
+        <div
+          className="absolute bottom-[-20px] right-5 w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold shadow-lg z-20 transition-transform duration-300 group-hover:scale-110 select-none"
+          style={{
+            background: dark ? "#1e293b" : "#fff",
+            color: theme.accent,
+            border: `3px solid ${dark ? "#1e293b" : "#fff"}`,
+          }}
+        >
+          {initials || <GraduationCap size={18} />}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="px-5 pt-8 pb-5">
+        <p className={`font-semibold text-sm ${dark ? "text-slate-200" : "text-gray-800"}`}>
+          {/* {course.instructor || "Instructor"} */}
+           {course.classTeacher || <p>Instructor</p>}
+        </p>
+        {course.department && (
+          <p className="text-xs opacity-40 mt-0.5">{course.department}</p>
+        )}
+
+        <div className="flex items-center justify-between mt-4">
+          {/* Stats row */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${theme.dot}`} />
+              <span className={`text-xs font-medium opacity-60 ${dark ? "text-slate-300" : "text-gray-600"}`}>
+                {course.subjects?.length || 0} topics
+              </span>
+            </div>
+          </div>
+
+          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusCfg.color}`}>
+            {statusCfg.label}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Courses({ dark = false, instituteCourses = [] }) {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [classCode, setClassCode] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
-useEffect(() => {
-  const saved = localStorage.getItem("courses");
-  if (saved) {
-    setCourses(JSON.parse(saved));
-  }
-}, []);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
+
   useEffect(() => {
-    setCourses(instituteCourses || []);
+    const saved = localStorage.getItem("courses");
+    if (saved) setCourses(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    if (instituteCourses?.length) setCourses(instituteCourses);
   }, [instituteCourses]);
 
-const handleJoinClass = async () => {
-  if (classCode.length < 5) return;
+  const filtered = courses.filter(c =>
+    c.name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.courseId?.toLowerCase().includes(search.toLowerCase()) ||
+    c.instructor?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  try {
-    const res = await fetch(
-      `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(classCode)}`
-    );
-    const data = await res.json();
-    const newCourses = data.course ? [data.course] : data.courses || [];
+  const handleJoinClass = async () => {
+    if (classCode.length < 3) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(classCode)}`
+      );
+      const data = await res.json();
+      const newCourses = data.course ? [data.course] : data.courses || [];
+      const existing = JSON.parse(localStorage.getItem("courses")) || [];
+      const isDuplicate = newCourses.some(nc => existing.find(ec => ec.courseId === nc.courseId));
+      if (isDuplicate) {
+        setShowJoinModal(false);
+        setClassCode("");
+        setShowDuplicatePopup(true);
+        setLoading(false);
+        return;
+      }
+      const merged = [...existing, ...newCourses];
+      setCourses(merged);
+      localStorage.setItem("courses", JSON.stringify(merged));
+      setShowJoinModal(false);
+      setClassCode("");
+    } catch (err) {
+      console.log("Error:", err);
+    }
+    setLoading(false);
+  };
 
-    // Merge with existing courses in localStorage
-    const existing = JSON.parse(localStorage.getItem("courses")) || [];
-    const mergedCourses = [...existing, ...newCourses];
-
-    setCourses(mergedCourses);
-    localStorage.setItem("courses", JSON.stringify(mergedCourses));
-
-    setShowJoinModal(false);
-    setClassCode("");
-  } catch (err) {
-    console.log("Error:", err);
-  }
-};
-
-  const getTopicIcon = (type) => {
-    switch (type) {
-      case "Video":      return <Video    size={18} className="text-red-500" />;
-      case "Assignment": return <FileText size={18} className="text-emerald-500" />;
-      case "Link":       return <LinkIcon size={18} className="text-blue-500" />;
-      default:           return <BookOpen size={18} className="text-indigo-500" />;
+  const handleCourseClick = async (course) => {
+    try {
+      const res = await fetch(
+        `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(course.courseId)}`
+      );
+      const data = await res.json();
+      if (data.success && data.course) {
+        const topics = data.course.subjects?.map((subj, idx) => ({
+          id: idx, title: subj, type: "Subject", date: "N/A",
+        })) || [];
+        setSelectedCourse({ ...data.course, topics });
+      }
+    } catch (err) {
+      console.log("Error:", err);
     }
   };
 
-  // ── Course Detail View ──────────────────────────────────────────────
+  const theme = selectedCourse
+    ? COURSE_THEMES[courses.findIndex(c => c.courseId === selectedCourse.courseId) % COURSE_THEMES.length]
+    : null;
+
+  // ── Detail View ─────────────────────────────────────
   if (selectedCourse) {
     return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-        {/* Back Header */}
-        <div className={`rounded-xl p-4 shadow flex items-center gap-4 transition-colors
-          ${dark ? "bg-slate-800 text-white" : "bg-white text-gray-800"}`}>
-          <button
-            onClick={() => setSelectedCourse(null)}
-            className={`p-2 rounded-full transition-colors ${dark ? "hover:bg-slate-700" : "hover:bg-gray-100"}`}
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <div>
-            <h2 className="text-xl font-bold">{selectedCourse.name}</h2>
-            <p className="text-sm opacity-60">
-              {selectedCourse.instructor} • {selectedCourse.code}
-            </p>
+      <div className="space-y-6 animate-fadeIn">
+        {/* Hero Header */}
+        <div
+          className={`rounded-3xl overflow-hidden shadow-xl relative`}
+          style={{ background: dark ? "#1e293b" : "#fff" }}
+        >
+          <div className={`bg-gradient-to-br ${theme.bg} px-6 pt-6 pb-16 relative overflow-hidden`}>
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+
+            <button
+              onClick={() => setSelectedCourse(null)}
+              className="relative z-10 flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium mb-5 transition-colors"
+            >
+              <ChevronLeft size={18} />
+              Back to Courses
+            </button>
+
+            <div className="relative z-10">
+              <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">{selectedCourse.courseId}</p>
+              <h2 className="text-white text-2xl font-bold leading-tight mb-2">{selectedCourse.name}</h2>
+              <p className="text-white/70 text-sm">{selectedCourse.instructor || "Instructor"}</p>
+            </div>
           </div>
+
+          {/* Stats bar */}
+          <div className="grid grid-cols-3 divide-x divide-gray-100 -mt-6 mx-6 rounded-2xl overflow-hidden shadow-lg z-10 relative"
+            style={{ background: dark ? "#0f172a" : "#fff" }}>
+            {[
+              { icon: BookOpen, label: "Topics", value: selectedCourse.topics?.length || 0 },
+              { icon: Clock, label: "Hours", value: "—" },
+              { icon: Users, label: "Students", value: "—" },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex flex-col items-center py-4 gap-1">
+                <Icon size={16} className="text-violet-500 opacity-70" />
+                <span className={`text-lg font-bold ${dark ? "text-white" : "text-gray-800"}`}>{value}</span>
+                <span className={`text-[11px] uppercase tracking-wide opacity-40 ${dark ? "text-slate-300" : "text-gray-600"}`}>{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="h-6" />
         </div>
 
-        {/* Topics List */}
-        <div className="space-y-3">
-          <h3 className={`text-lg font-semibold px-2 ${dark ? "text-slate-300" : "text-gray-600"}`}>
-            Course Content
-          </h3>
-          {selectedCourse.topics?.map((topic) => (
-            <div
-              key={topic.id}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group
-                ${dark
-                  ? "bg-slate-800 border-slate-700 hover:bg-slate-750 text-white"
-                  : "bg-white border-gray-100 hover:border-indigo-200 text-gray-800 shadow-sm"}`}
-            >
-              <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-full ${dark ? "bg-slate-900" : "bg-gray-50"}`}>
-                  {getTopicIcon(topic.type)}
+        {/* Topics */}
+        <div>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h3 className={`text-base font-bold ${dark ? "text-slate-200" : "text-gray-700"}`}>
+              Course Content
+            </h3>
+            <span className={`text-xs font-semibold opacity-50 ${dark ? "text-slate-300" : "text-gray-500"}`}>
+              {selectedCourse.topics?.length} items
+            </span>
+          </div>
+          <div className="space-y-2">
+            {selectedCourse.topics?.length > 0
+              ? selectedCourse.topics.map((topic, i) => (
+                  <TopicRow key={topic.id} topic={topic} index={i} dark={dark} />
+                ))
+              : (
+                <div className="text-center py-16 opacity-40">
+                  <BookOpen size={36} className="mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No topics added yet</p>
                 </div>
-                <div>
-                  <h4 className="font-medium group-hover:text-indigo-500 transition-colors">
-                    {topic.title}
-                  </h4>
-                  <p className="text-xs opacity-50">{topic.type} • Posted {topic.date}</p>
-                </div>
-              </div>
-              <ArrowRight
-                size={16}
-                className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-indigo-500"
-              />
-            </div>
-          ))}
+              )
+            }
+          </div>
         </div>
       </div>
     );
   }
 
-  // ── Main View ───────────────────────────────────────────────────────
+  // ── Main Grid View ──────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
 
-      {/* Header */}
-      <div className={`rounded-xl p-6 shadow flex items-center justify-between transition-colors duration-300
-        ${dark ? "bg-slate-800 text-white" : "bg-white text-gray-800"}`}>
-        <div>
-          <h2 className="text-xl font-semibold">📚 My Classrooms</h2>
-          <p className="text-sm opacity-70">Access your enrolled courses</p>
+      {/* Hero bar */}
+      <div
+        className="rounded-3xl p-6 relative overflow-hidden"
+        style={{
+          background: dark
+            ? "linear-gradient(135deg, #312e81 0%, #1e1b4b 100%)"
+            : "linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%)",
+        }}
+      >
+        {/* decoration */}
+        <div className="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute bottom-0 left-1/4 w-20 h-20 rounded-full bg-white/5 blur-xl" />
+
+
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              {/* <Sparkles size={14} className="text-violet-200" /> */}
+              <span className="text-violet-200 text-xs font-semibold uppercase tracking-widest">Learning Hub</span>
+            </div>
+            <h2 className="text-white text-2xl font-bold">My Classrooms</h2>
+            <p className="text-white/60 text-sm mt-1">
+              {courses.length} course{courses.length !== 1 ? "s" : ""} enrolled
+            </p>
+          </div>
+          <button
+            onClick={() => setShowJoinModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white text-violet-700 rounded-xl font-bold text-sm shadow-lg hover:bg-violet-50 active:scale-95 transition-all duration-200"
+          >
+            <Plus size={17} />
+            <span>Join Class</span>
+          </button>
         </div>
-        <button
-          onClick={() => setShowJoinModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all active:scale-95"
-        >
-          <Plus size={18} />
-          <span className="hidden sm:inline">Join Class</span>
-        </button>
       </div>
 
-      {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {courses.length === 0 ? (
-          <p className="text-center opacity-60 col-span-full py-12">No courses found</p>
+      {/* Search */}
+      <div
+        className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+        style={{
+          background: dark ? "rgba(255,255,255,0.05)" : "#f9fafb",
+          border: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb",
+        }}
+      >
+        <Search size={16} className="opacity-40 shrink-0" />
+        <input
+          type="text"
+          placeholder="Search by course name, code, or instructor…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
+          style={{ color: dark ? "#e2e8f0" : "#111827" }}
+        />
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        {filtered.length === 0 ? (
+          <div className="col-span-full text-center py-20">
+            <div className="w-16 h-16 rounded-3xl bg-violet-50 flex items-center justify-center mx-auto mb-4">
+              <GraduationCap size={28} className="text-violet-400" />
+            </div>
+            <p className={`text-base font-semibold ${dark ? "text-slate-300" : "text-gray-500"}`}>
+              {search ? "No matching courses" : "No courses yet"}
+            </p>
+            <p className="text-sm opacity-40 mt-1">
+              {search ? "Try a different search term" : "Join a class using a code from your instructor"}
+            </p>
+          </div>
         ) : (
-          courses.map((course, i) => {
-            const color    = HEADER_COLORS[i % HEADER_COLORS.length];
-            const initials = getInitials(course.instructor);
-            const status   = course.status || "active";
-
-            return (
-              <div
-                key={i}
-                onClick={() => setSelectedCourse(course)}
-                className={`rounded-lg overflow-hidden border cursor-pointer transition-shadow hover:shadow-lg
-                  ${dark ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"}`}
-              >
-                {/* Colored Banner */}
-                <div className={`relative h-24 bg-gradient-to-br ${color} p-4 flex flex-col justify-between`}>
-                  <div>
-                    <h3 className="text-white font-medium text-sm leading-snug pr-12 line-clamp-2">
-                      {course.name}
-                    </h3>
-                    <p className="text-white/75 text-xs mt-0.5">
-                      {course.code}{course.department ? ` · ${course.department}` : ""}
-                    </p>
-                  </div>
-                  {/* Instructor Avatar */}
-                  <div className={`absolute bottom-[-18px] right-4 w-10 h-10 rounded-full border-[3px] flex items-center justify-center text-sm font-semibold select-none
-                    ${dark
-                      ? "bg-slate-800 border-slate-800 text-slate-200"
-                      : "bg-white border-white text-gray-600"}`}>
-                    {initials || ""}
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="px-4 pt-7 pb-2">
-                  <p className={`text-sm font-medium ${dark ? "text-slate-200" : "text-gray-700"}`}>
-                    {course.instructor || "Instructor"}
-                  </p>
-                  <p className={`text-xs mt-0.5 ${dark ? "text-slate-500" : "text-gray-400"}`}>
-                    {course.topics?.length || 0} topics
-                  </p>
-                  <span className={`inline-block mt-2 text-xs font-medium px-2.5 py-0.5 rounded-full
-                    ${STATUS_STYLES[status] || STATUS_STYLES.active}`}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </span>
-                </div>
-
-                {/* Footer */}
-                <div className={`flex justify-end gap-1 px-2 py-1 mt-2 border-t
-                  ${dark ? "border-slate-700" : "border-gray-100"}`}>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); }}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors
-                      ${dark ? "text-slate-400 hover:bg-slate-700" : "text-gray-400 hover:bg-gray-100"}`}
-                    title="Course files"
-                  >
-                    <BookOpen size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); }}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors
-                      ${dark ? "text-slate-400 hover:bg-slate-700" : "text-gray-400 hover:bg-gray-100"}`}
-                    title="More options"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <circle cx="5" cy="12" r="1.8"/>
-                      <circle cx="12" cy="12" r="1.8"/>
-                      <circle cx="19" cy="12" r="1.8"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            );
-          })
+          filtered.map((course, i) => (
+            <CourseCard
+              key={i}
+              course={course}
+              index={courses.indexOf(course)}
+              dark={dark}
+              onClick={() => handleCourseClick(course)}
+            />
+          ))
         )}
       </div>
 
-      {/* Join Class Modal */}
+      {/* Join Modal */}
       {showJoinModal && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4"
+          className="fixed inset-0 flex items-center justify-center z-[70] p-4"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)" }}
           onClick={() => setShowJoinModal(false)}
         >
           <div
-            className={`w-full max-w-sm p-8 rounded-2xl shadow-2xl
-              ${dark ? "bg-slate-800 text-white" : "bg-white text-gray-800"}`}
-            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-fadeIn"
+            style={{ background: dark ? "#1e293b" : "#fff" }}
+            onClick={e => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Join a Class</h3>
-              <X
-                className="cursor-pointer opacity-50 hover:opacity-100"
+            {/* Modal header */}
+            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 pt-8 pb-10 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+              <button
                 onClick={() => setShowJoinModal(false)}
-              />
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <X size={15} className="text-white" />
+              </button>
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
+                <GraduationCap size={24} className="text-white" />
+              </div>
+              <h3 className="text-white text-xl font-bold">Join a Classroom</h3>
+              <p className="text-white/60 text-sm mt-1">Enter the code from your instructor</p>
             </div>
 
-            <p className="text-sm opacity-70 mb-6">
-              Enter the class code provided by your instructor.
-            </p>
+            {/* Input area */}
+            <div className="px-7 py-6 -mt-4">
+              <div
+                className="rounded-2xl overflow-hidden mb-5"
+                style={{ background: dark ? "#0f172a" : "#f9fafb", border: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb" }}
+              >
+                <input
+                  type="text"
+                  placeholder="e.g. ABC-123"
+                  value={classCode}
+                  onChange={e => setClassCode(e.target.value.toUpperCase())}
+                  className="w-full px-5 py-4 bg-transparent text-center text-2xl font-mono font-bold tracking-[0.3em] outline-none placeholder-gray-300"
+                  style={{ color: dark ? "#e2e8f0" : "#1e293b" }}
+                  onKeyDown={e => e.key === "Enter" && handleJoinClass()}
+                />
+              </div>
 
-            <input
-              type="text"
-              placeholder="e.g. ABC-123"
-              value={classCode}
-              onChange={(e) => setClassCode(e.target.value.toUpperCase())}
-              className={`w-full p-4 mb-6 border rounded-xl text-center text-xl font-mono tracking-widest outline-none focus:ring-2
-                ${dark
-                  ? "bg-slate-900 border-slate-600 focus:ring-indigo-500 text-white"
-                  : "bg-gray-50 border-gray-200 focus:ring-indigo-500 text-gray-800"}`}
-            />
-
-            <div className="flex flex-col gap-3">
               <button
                 onClick={handleJoinClass}
-                disabled={!classCode}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all disabled:opacity-50"
+                disabled={!classCode || loading}
+                className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-violet-700 hover:to-indigo-700 active:scale-98 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Join Classroom
+                {loading ? "Joining…" : "Join Classroom"}
               </button>
+
               <button
                 onClick={() => setShowJoinModal(false)}
-                className={`w-full py-3 rounded-xl text-sm font-medium
-                  ${dark ? "hover:bg-slate-700" : "hover:bg-gray-100"}`}
+                className={`w-full py-3 mt-2 rounded-2xl text-sm font-medium transition-colors ${dark ? "text-slate-400 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"}`}
               >
                 Cancel
               </button>
@@ -277,6 +432,51 @@ const handleJoinClass = async () => {
         </div>
       )}
 
+      {/* Duplicate Course Popup */}
+      {showDuplicatePopup && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[80] p-4"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)" }}
+          onClick={() => setShowDuplicatePopup(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-fadeIn"
+            style={{ background: dark ? "#1e293b" : "#fff" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-7 pt-8 pb-10 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
+                <span className="text-2xl">📚</span>
+              </div>
+              <h3 className="text-white text-xl font-bold">Already Joined</h3>
+              <p className="text-white/70 text-sm mt-1">You're already enrolled in this course!</p>
+            </div>
+
+            {/* Body */}
+            <div className="px-7 py-6 -mt-4">
+              <p className={`text-sm opacity-60 mb-5 ${dark ? "text-slate-300" : "text-gray-600"}`}>
+                No need to join again — head back to your classrooms to access it.
+              </p>
+              <button
+                onClick={() => setShowDuplicatePopup(false)}
+                className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all duration-200"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.35s ease both; }
+      `}</style>
     </div>
   );
 }

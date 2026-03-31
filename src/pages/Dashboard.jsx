@@ -24,7 +24,7 @@ export default function Dashboard({ dark, toggleTheme }) {
 
   const [instituteCourses, setInstituteCourses] = useState([]);
 
-  // ✅ LOAD DATA ON RELOAD
+  
   useEffect(() => {
     const savedCourses = localStorage.getItem("courses");
     if (savedCourses) {
@@ -94,8 +94,12 @@ export default function Dashboard({ dark, toggleTheme }) {
           setRightOpen={setRightOpen}
         />
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 SM:top-10">
   {renderContent()}
+
+
+
+
 </div>
       </div>
 

@@ -111,7 +111,7 @@ export default function HelpSection({ dark }) {
                     <p className="text-xs sm:text-sm opacity-50 mt-0.5">Submit queries · Track requests · Get answers</p>
                 </div>
                 <div className={`text-xs px-3 py-1.5 rounded-full font-medium w-fit ${d ? "bg-green-900/50 text-green-300" : "bg-green-50 text-green-700"}`}>
-                    ● Support Online
+                     Support Online
                 </div>
             </div>
 

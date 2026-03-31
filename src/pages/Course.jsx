@@ -109,7 +109,7 @@ function CourseCard({ course, index, dark, onClick }) {
       <div className="px-5 pt-8 pb-5">
         <p className={`font-semibold text-sm ${dark ? "text-slate-200" : "text-gray-800"}`}>
           {/* {course.instructor || "Instructor"} */}
-           {course.classTeacher || <p>Instructor</p>}
+           {course.classTeacher || <p>Teacher</p>}
         </p>
         {course.department && (
           <p className="text-xs opacity-40 mt-0.5">{course.department}</p>

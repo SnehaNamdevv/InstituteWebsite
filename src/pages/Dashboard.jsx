@@ -96,10 +96,6 @@ export default function Dashboard({ dark, toggleTheme }) {
 
         <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 sm:mt-4">
   {renderContent()}
-
-
-
-
 </div>
       </div>
 

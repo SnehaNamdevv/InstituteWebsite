@@ -28,7 +28,7 @@ const TOPIC_ICON_CONFIG = {
   Subject:    { icon: BookOpen,  bg: "bg-violet-50",   color: "text-violet-500",  label: "Subject" },
 };
 
-/* ── Success Popup ─────────────────────────────────── */
+
 function SuccessPopup({ dark, onClose }) {
   return (
     <div
@@ -82,7 +82,7 @@ function SuccessPopup({ dark, onClose }) {
   );
 }
 
-/* ── Locked Overlay on Card ────────────────────────── */
+
 function LockedOverlay({ dark }) {
   return (
     <div
@@ -105,7 +105,7 @@ function LockedOverlay({ dark }) {
   );
 }
 
-/* ── Topic Row ─────────────────────────────────────── */
+
 function TopicRow({ topic, index, dark }) {
   const cfg = TOPIC_ICON_CONFIG[topic.type] || TOPIC_ICON_CONFIG.Subject;
   const Icon = cfg.icon;
@@ -136,7 +136,6 @@ function TopicRow({ topic, index, dark }) {
   );
 }
 
-/* ── Course Card ───────────────────────────────────── */
 function CourseCard({ course, index, dark, onClick }) {
   const theme = COURSE_THEMES[index % COURSE_THEMES.length];
   const initials = getInitials(course.instructor);
@@ -203,7 +202,7 @@ function CourseCard({ course, index, dark, onClick }) {
   );
 }
 
-/* ── Main Export ───────────────────────────────────── */
+
 export default function Courses({ dark = false, instituteCourses = [] }) {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [classCode, setClassCode] = useState("");
@@ -212,7 +211,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // ✅ NEW
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false); 
 
   useEffect(() => {
     const saved = localStorage.getItem("courses");
@@ -223,7 +222,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     if (instituteCourses?.length) setCourses(instituteCourses);
   }, [instituteCourses]);
 
-  // ✅ Poll for approval status every 10s for pending courses
+  
   useEffect(() => {
     const pendingCourses = courses.filter(c => c.status === "pending");
     if (!pendingCourses.length) return;
@@ -295,7 +294,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
       const data = await res.json();
 
       if (data.message === "Request sent to teacher") {
-        // ✅ Close join modal, show success popup
+        
         setShowJoinModal(false);
         setClassCode("");
         setShowSuccessPopup(true);
@@ -349,7 +348,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     ? COURSE_THEMES[courses.findIndex(c => c.courseId === selectedCourse.courseId) % COURSE_THEMES.length]
     : null;
 
-  // ── Detail View ─────────────────────────────────────
+
   if (selectedCourse) {
     return (
       <div className="space-y-6 animate-fadeIn">
@@ -413,7 +412,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     );
   }
 
-  // ── Main Grid View ──────────────────────────────────
+
   return (
     <div className="space-y-7">
 
@@ -554,12 +553,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
         </div>
       )}
 
-      {/* ── Success Popup (replaces alert) ── */}
+     
       {showSuccessPopup && (
         <SuccessPopup dark={dark} onClose={() => setShowSuccessPopup(false)} />
       )}
 
-      {/* ── Duplicate Course Popup ── */}
+    
       {showDuplicatePopup && (
         <div
           className="fixed inset-0 flex items-center justify-center z-[80] p-4"

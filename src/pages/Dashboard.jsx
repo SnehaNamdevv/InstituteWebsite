@@ -94,7 +94,7 @@ export default function Dashboard({ dark, toggleTheme }) {
           setRightOpen={setRightOpen}
         />
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 sm:mt-4">
+       <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6 pt-16 sm:pt-6">
   {renderContent()}
 </div>
       </div>

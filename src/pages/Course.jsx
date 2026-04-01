@@ -312,7 +312,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               : c
           );
 
-          const changed = updatedCourses.some((c, i) => c.status !== current[i]?.status);
+          const changed = updatedCourses.some(updated => {
+  const old = current.find(c => c.courseId === updated.courseId);
+  return old && old.status !== updated.status;
+});
+console.log("Frontend IDs:", current.map(c => c.courseId));
+console.log("Backend ID:", approvedCourseId);
           if (changed) {
             const deduped = deduplicateCourses(updatedCourses);
             setCourses(deduped);

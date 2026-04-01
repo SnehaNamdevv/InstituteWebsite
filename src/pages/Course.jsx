@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BookOpen, ArrowRight, X, ChevronLeft, FileText, Video, Link as LinkIcon, Search, Star, Clock, Users, Sparkles, GraduationCap, ChevronRight } from "lucide-react";
+import { Plus, BookOpen, ArrowRight, X, ChevronLeft, FileText, Video, Link as LinkIcon, Search, Star, Clock, Users, Sparkles, GraduationCap, ChevronRight, Lock, CheckCircle } from "lucide-react";
 
 const COURSE_THEMES = [
   { bg: "from-violet-600 via-purple-600 to-indigo-700", accent: "#7c3aed", light: "#ede9fe", text: "#5b21b6", dot: "bg-violet-400" },
@@ -11,9 +11,11 @@ const COURSE_THEMES = [
 ];
 
 const STATUS_CONFIG = {
-  active:   { label: "Active",    color: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
-  upcoming: { label: "Upcoming",  color: "bg-blue-100 text-blue-700 border border-blue-200" },
-  archived: { label: "Archived",  color: "bg-gray-100 text-gray-600 border border-gray-200" },
+  active:    { label: "Active",    color: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
+  upcoming:  { label: "Upcoming",  color: "bg-blue-100 text-blue-700 border border-blue-200" },
+  archived:  { label: "Archived",  color: "bg-gray-100 text-gray-600 border border-gray-200" },
+  pending:   { label: "Pending",   color: "bg-yellow-100 text-yellow-700 border border-yellow-200" },
+  approved:  { label: "Approved",  color: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
 };
 
 const getInitials = (name = "") =>
@@ -26,6 +28,84 @@ const TOPIC_ICON_CONFIG = {
   Subject:    { icon: BookOpen,  bg: "bg-violet-50",   color: "text-violet-500",  label: "Subject" },
 };
 
+/* ── Success Popup ─────────────────────────────────── */
+function SuccessPopup({ dark, onClose }) {
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[80] p-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-popIn"
+        style={{ background: dark ? "#1e293b" : "#fff" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600 px-7 pt-8 pb-12 relative overflow-hidden text-center">
+          <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute bottom-0 left-1/4 w-20 h-20 rounded-full bg-white/10 blur-xl" />
+          <div className="relative z-10">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">📨</span>
+            </div>
+            <h3 className="text-white text-xl font-bold">Request Sent!</h3>
+            <p className="text-white/70 text-sm mt-1">Waiting for teacher's approval</p>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-7 py-6 -mt-4">
+          <div
+            className="rounded-2xl p-4 mb-5 flex items-start gap-3"
+            style={{ background: dark ? "#0f172a" : "#f9fafb", border: dark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #e5e7eb" }}
+          >
+            <div className="w-8 h-8 rounded-xl bg-yellow-100 flex items-center justify-center shrink-0 mt-0.5">
+              <Lock size={14} className="text-yellow-600" />
+            </div>
+            <div>
+              <p className={`text-sm font-semibold ${dark ? "text-slate-200" : "text-gray-800"}`}>Course is temporarily locked</p>
+              <p className={`text-xs mt-0.5 opacity-50 ${dark ? "text-slate-400" : "text-gray-500"}`}>
+                The course will unlock automatically once your teacher approves the request ⏳
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-violet-700 hover:to-indigo-700 active:scale-95 transition-all duration-200"
+          >
+            Got it!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Locked Overlay on Card ────────────────────────── */
+function LockedOverlay({ dark }) {
+  return (
+    <div
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl gap-2"
+      style={{
+        background: dark
+          ? "rgba(15,23,42,0.82)"
+          : "rgba(255,255,255,0.82)",
+        backdropFilter: "blur(6px)",
+      }}
+    >
+      <div className="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center shadow-lg">
+        <Lock size={22} className="text-yellow-600" />
+      </div>
+      <p className={`text-xs font-bold ${dark ? "text-yellow-400" : "text-yellow-700"}`}>Pending Approval</p>
+      <p className={`text-[10px] text-center px-6 opacity-60 ${dark ? "text-slate-400" : "text-gray-500"}`}>
+        Teacher hasn't approved yet
+      </p>
+    </div>
+  );
+}
+
+/* ── Topic Row ─────────────────────────────────────── */
 function TopicRow({ topic, index, dark }) {
   const cfg = TOPIC_ICON_CONFIG[topic.type] || TOPIC_ICON_CONFIG.Subject;
   const Icon = cfg.icon;
@@ -39,23 +119,16 @@ function TopicRow({ topic, index, dark }) {
         animationDelay: `${index * 60}ms`,
       }}
     >
-      {/* Number */}
       <span className="w-6 text-center text-xs font-bold opacity-25 shrink-0">{String(index + 1).padStart(2, '0')}</span>
-
-      {/* Icon */}
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
         <Icon size={18} className={cfg.color} />
       </div>
-
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <p className={`font-semibold text-sm truncate transition-colors duration-200 group-hover:text-violet-500 ${dark ? "text-white" : "text-gray-800"}`}>
           {topic.title}
         </p>
         <p className="text-xs opacity-50 mt-0.5">{cfg.label}</p>
       </div>
-
-      {/* Arrow */}
       <div className="w-8 h-8 rounded-full flex items-center justify-center bg-violet-500/0 group-hover:bg-violet-500 transition-all duration-300 shrink-0">
         <ChevronRight size={14} className="text-violet-400 group-hover:text-white transition-colors duration-300" />
       </div>
@@ -63,36 +136,35 @@ function TopicRow({ topic, index, dark }) {
   );
 }
 
+/* ── Course Card ───────────────────────────────────── */
 function CourseCard({ course, index, dark, onClick }) {
   const theme = COURSE_THEMES[index % COURSE_THEMES.length];
   const initials = getInitials(course.instructor);
   const status = course.status || "active";
   const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+  const isPending = status === "pending";
 
   return (
     <div
-      onClick={onClick}
-      className="group rounded-2xl overflow-hidden cursor-pointer transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl"
+      onClick={isPending ? undefined : onClick}
+      className={`group rounded-2xl overflow-hidden transition-all duration-400 relative ${isPending ? "cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-2xl"}`}
       style={{
         background: dark ? "rgba(255,255,255,0.05)" : "#fff",
         border: dark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.07)",
         boxShadow: dark ? "0 4px 24px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.06)",
       }}
     >
+      {/* Locked overlay */}
+      {isPending && <LockedOverlay dark={dark} />}
+
       {/* Banner */}
       <div className={`relative h-32 bg-gradient-to-br ${theme.bg} p-5 overflow-hidden`}>
-        {/* Decorative blobs */}
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
         <div className="absolute bottom-0 left-1/3 w-16 h-16 rounded-full bg-white/10 blur-lg" />
-
-
-        {/* Course name */}
         <div className="relative z-10 pr-14">
           <p className="text-white/60 text-[10px] font-semibold uppercase tracking-widest mb-1">{course.courseId}</p>
           <h3 className="text-white font-bold text-base leading-tight line-clamp-2">{course.name}</h3>
         </div>
-
-        {/* Avatar */}
         <div
           className="absolute bottom-[-20px] right-5 w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold shadow-lg z-20 transition-transform duration-300 group-hover:scale-110 select-none"
           style={{
@@ -108,15 +180,12 @@ function CourseCard({ course, index, dark, onClick }) {
       {/* Body */}
       <div className="px-5 pt-8 pb-5">
         <p className={`font-semibold text-sm ${dark ? "text-slate-200" : "text-gray-800"}`}>
-          {/* {course.instructor || "Instructor"} */}
-           {course.classTeacher || <p>Teacher</p>}
+          {course.classTeacher || <span className="opacity-40">Teacher</span>}
         </p>
         {course.department && (
           <p className="text-xs opacity-40 mt-0.5">{course.department}</p>
         )}
-
         <div className="flex items-center justify-between mt-4">
-          {/* Stats row */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${theme.dot}`} />
@@ -125,7 +194,6 @@ function CourseCard({ course, index, dark, onClick }) {
               </span>
             </div>
           </div>
-
           <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusCfg.color}`}>
             {statusCfg.label}
           </span>
@@ -135,6 +203,7 @@ function CourseCard({ course, index, dark, onClick }) {
   );
 }
 
+/* ── Main Export ───────────────────────────────────── */
 export default function Courses({ dark = false, instituteCourses = [] }) {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [classCode, setClassCode] = useState("");
@@ -143,6 +212,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // ✅ NEW
 
   useEffect(() => {
     const saved = localStorage.getItem("courses");
@@ -153,6 +223,47 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     if (instituteCourses?.length) setCourses(instituteCourses);
   }, [instituteCourses]);
 
+  // ✅ Poll for approval status every 10s for pending courses
+  useEffect(() => {
+    const pendingCourses = courses.filter(c => c.status === "pending");
+    if (!pendingCourses.length) return;
+
+    const interval = setInterval(async () => {
+      const studentStr = localStorage.getItem("student");
+      const student = studentStr ? JSON.parse(studentStr) : null;
+      const studentId = student?.studentID;
+      if (!studentId) return;
+
+      const updatedCourses = [...courses];
+      let changed = false;
+
+      for (const pending of pendingCourses) {
+        try {
+          const res = await fetch(
+            `https://institute-backend-0ncp.onrender.com/api/courses/course/${pending.courseId}/access/${studentId}`
+          );
+          const data = await res.json();
+          if (data.success && data.course) {
+            const idx = updatedCourses.findIndex(c => c.courseId === pending.courseId);
+            if (idx !== -1) {
+              updatedCourses[idx] = { ...data.course, status: "active" };
+              changed = true;
+            }
+          }
+        } catch (err) {
+          // silent
+        }
+      }
+
+      if (changed) {
+        setCourses(updatedCourses);
+        localStorage.setItem("courses", JSON.stringify(updatedCourses));
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [courses]);
+
   const filtered = courses.filter(c =>
     c.name?.toLowerCase().includes(search.toLowerCase()) ||
     c.courseId?.toLowerCase().includes(search.toLowerCase()) ||
@@ -162,33 +273,62 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   const handleJoinClass = async () => {
     if (classCode.length < 3) return;
     setLoading(true);
+
     try {
-      const res = await fetch(
-        `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(classCode)}`
-      );
-      const data = await res.json();
-      const newCourses = data.course ? [data.course] : data.courses || [];
-      const existing = JSON.parse(localStorage.getItem("courses")) || [];
-      const isDuplicate = newCourses.some(nc => existing.find(ec => ec.courseId === nc.courseId));
-      if (isDuplicate) {
-        setShowJoinModal(false);
-        setClassCode("");
-        setShowDuplicatePopup(true);
+      const student = JSON.parse(localStorage.getItem("student"));
+      const studentId = student?.studentID;
+
+      if (!studentId) {
+        alert("Please login again");
         setLoading(false);
         return;
       }
-      const merged = [...existing, ...newCourses];
-      setCourses(merged);
-      localStorage.setItem("courses", JSON.stringify(merged));
-      setShowJoinModal(false);
-      setClassCode("");
+
+      const res = await fetch(
+        "https://institute-backend-0ncp.onrender.com/student/apply-course",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ courseId: classCode, studentId }),
+        }
+      );
+      const data = await res.json();
+
+      if (data.message === "Request sent to teacher") {
+        // ✅ Close join modal, show success popup
+        setShowJoinModal(false);
+        setClassCode("");
+        setShowSuccessPopup(true);
+
+        const existing = JSON.parse(localStorage.getItem("courses")) || [];
+        const newCourse = {
+          courseId: classCode,
+          name: classCode,
+          status: "pending",
+          subjects: [],
+        };
+        const updated = [...existing, newCourse];
+        setCourses(updated);
+        localStorage.setItem("courses", JSON.stringify(updated));
+      } else if (data.message?.toLowerCase().includes("already")) {
+        setShowJoinModal(false);
+        setClassCode("");
+        setShowDuplicatePopup(true);
+      } else {
+        alert(data.message);
+        setShowJoinModal(false);
+        setClassCode("");
+      }
     } catch (err) {
-      console.log("Error:", err);
+      console.log(err);
+      alert("Server error");
     }
+
     setLoading(false);
   };
 
   const handleCourseClick = async (course) => {
+    if (course.status === "pending") return; // locked
     try {
       const res = await fetch(
         `https://institute-backend-0ncp.onrender.com/api/courses/course/${encodeURIComponent(course.courseId)}`
@@ -213,14 +353,9 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   if (selectedCourse) {
     return (
       <div className="space-y-6 animate-fadeIn">
-        {/* Hero Header */}
-        <div
-          className={`rounded-3xl overflow-hidden shadow-xl relative`}
-          style={{ background: dark ? "#1e293b" : "#fff" }}
-        >
+        <div className="rounded-3xl overflow-hidden shadow-xl relative" style={{ background: dark ? "#1e293b" : "#fff" }}>
           <div className={`bg-gradient-to-br ${theme.bg} px-6 pt-6 pb-16 relative overflow-hidden`}>
             <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-
             <button
               onClick={() => setSelectedCourse(null)}
               className="relative z-10 flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium mb-5 transition-colors"
@@ -228,17 +363,16 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               <ChevronLeft size={18} />
               Back to Courses
             </button>
-
             <div className="relative z-10">
               <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">{selectedCourse.courseId}</p>
               <h2 className="text-white text-2xl font-bold leading-tight mb-2">{selectedCourse.name}</h2>
               <p className="text-white/70 text-sm">{selectedCourse.instructor || "Instructor"}</p>
             </div>
           </div>
-
-          {/* Stats bar */}
-          <div className="grid grid-cols-3 divide-x divide-gray-100 -mt-6 mx-6 rounded-2xl overflow-hidden shadow-lg z-10 relative"
-            style={{ background: dark ? "#0f172a" : "#fff" }}>
+          <div
+            className="grid grid-cols-3 divide-x divide-gray-100 -mt-6 mx-6 rounded-2xl overflow-hidden shadow-lg z-10 relative"
+            style={{ background: dark ? "#0f172a" : "#fff" }}
+          >
             {[
               { icon: BookOpen, label: "Topics", value: selectedCourse.topics?.length || 0 },
               { icon: Clock, label: "Hours", value: "—" },
@@ -251,16 +385,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               </div>
             ))}
           </div>
-
           <div className="h-6" />
         </div>
 
-        {/* Topics */}
         <div>
           <div className="flex items-center justify-between mb-4 px-1">
-            <h3 className={`text-base font-bold ${dark ? "text-slate-200" : "text-gray-700"}`}>
-              Course Content
-            </h3>
+            <h3 className={`text-base font-bold ${dark ? "text-slate-200" : "text-gray-700"}`}>Course Content</h3>
             <span className={`text-xs font-semibold opacity-50 ${dark ? "text-slate-300" : "text-gray-500"}`}>
               {selectedCourse.topics?.length} items
             </span>
@@ -296,15 +426,11 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
             : "linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%)",
         }}
       >
-        {/* decoration */}
         <div className="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 left-1/4 w-20 h-20 rounded-full bg-white/5 blur-xl" />
-
-
         <div className="relative z-10 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              {/* <Sparkles size={14} className="text-violet-200" /> */}
               <span className="text-violet-200 text-xs font-semibold uppercase tracking-widest">Learning Hub</span>
             </div>
             <h2 className="text-white text-2xl font-bold">My Classrooms</h2>
@@ -368,7 +494,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
         )}
       </div>
 
-      {/* Join Modal */}
+      {/* ── Join Modal ── */}
       {showJoinModal && (
         <div
           className="fixed inset-0 flex items-center justify-center z-[70] p-4"
@@ -380,7 +506,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
             style={{ background: dark ? "#1e293b" : "#fff" }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 pt-8 pb-10 relative overflow-hidden">
               <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
               <button
@@ -396,7 +521,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               <p className="text-white/60 text-sm mt-1">Enter the code from your instructor</p>
             </div>
 
-            {/* Input area */}
             <div className="px-7 py-6 -mt-4">
               <div
                 className="rounded-2xl overflow-hidden mb-5"
@@ -412,7 +536,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
                   onKeyDown={e => e.key === "Enter" && handleJoinClass()}
                 />
               </div>
-
               <button
                 onClick={handleJoinClass}
                 disabled={!classCode || loading}
@@ -420,7 +543,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               >
                 {loading ? "Joining…" : "Join Classroom"}
               </button>
-
               <button
                 onClick={() => setShowJoinModal(false)}
                 className={`w-full py-3 mt-2 rounded-2xl text-sm font-medium transition-colors ${dark ? "text-slate-400 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"}`}
@@ -432,7 +554,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
         </div>
       )}
 
-      {/* Duplicate Course Popup */}
+      {/* ── Success Popup (replaces alert) ── */}
+      {showSuccessPopup && (
+        <SuccessPopup dark={dark} onClose={() => setShowSuccessPopup(false)} />
+      )}
+
+      {/* ── Duplicate Course Popup ── */}
       {showDuplicatePopup && (
         <div
           className="fixed inset-0 flex items-center justify-center z-[80] p-4"
@@ -444,7 +571,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
             style={{ background: dark ? "#1e293b" : "#fff" }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-7 pt-8 pb-10 relative overflow-hidden">
               <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
               <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
@@ -453,8 +579,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               <h3 className="text-white text-xl font-bold">Already Joined</h3>
               <p className="text-white/70 text-sm mt-1">You're already enrolled in this course!</p>
             </div>
-
-            {/* Body */}
             <div className="px-7 py-6 -mt-4">
               <p className={`text-sm opacity-60 mb-5 ${dark ? "text-slate-300" : "text-gray-600"}`}>
                 No need to join again — head back to your classrooms to access it.
@@ -475,7 +599,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.92) translateY(8px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
         .animate-fadeIn { animation: fadeIn 0.35s ease both; }
+        .animate-popIn  { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
       `}</style>
     </div>
   );

@@ -76,7 +76,7 @@ export default function Sidebar({ sidebarOpen, dark, activeSection, setActiveSec
 
       <div className="p-4 space-y-3">
 
-        {/* Institute Name Card */}
+       
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-xl p-4 text-center">
           <div className="text-xs font-medium opacity-80 mb-1">🎓 Institute</div>
           <div className="text-sm font-bold leading-snug">{instituteName}</div>

@@ -5,7 +5,7 @@ import {
   ChevronRight, Lock, X, CalendarDays, LayoutGrid,
 } from "lucide-react";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+
 
 const API = "https://institute-backend-0ncp.onrender.com";
 
@@ -25,16 +25,14 @@ const TOPIC_ICON_CONFIG = {
   Subject:    { icon: BookOpen, bg: "bg-violet-50",  color: "text-violet-500",  label: "Subject"       },
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// classTeacher can be a string or an array — always return a display string
 const resolveTeacher = (val) => {
   if (!val) return null;
   if (Array.isArray(val)) return val.length ? val[0] : null;
   return val;
 };
 
-// subjects[] -> topics[] for detail view
+
 const buildTopics = (subjects = []) =>
   subjects.map((subj, idx) => ({ id: idx, title: subj, type: "Subject" }));
 
@@ -58,7 +56,6 @@ const formatDate = (iso) => {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 };
 
-// ─── Modal wrapper ────────────────────────────────────────────────────────────
 
 function Modal({ dark, onClose, children }) {
   return (
@@ -78,7 +75,6 @@ function Modal({ dark, onClose, children }) {
   );
 }
 
-// ─── Locked overlay ───────────────────────────────────────────────────────────
 
 function LockedOverlay({ dark }) {
   return (
@@ -102,7 +98,6 @@ function LockedOverlay({ dark }) {
   );
 }
 
-// ─── Subject row in detail view ───────────────────────────────────────────────
 
 function TopicRow({ topic, index, dark }) {
   const cfg = TOPIC_ICON_CONFIG[topic.type] || TOPIC_ICON_CONFIG.Subject;
@@ -135,7 +130,6 @@ function TopicRow({ topic, index, dark }) {
   );
 }
 
-// ─── Course card ──────────────────────────────────────────────────────────────
 
 function CourseCard({ course, index, dark, onClick }) {
   const theme = COURSE_THEMES[index % COURSE_THEMES.length];
@@ -162,11 +156,11 @@ function CourseCard({ course, index, dark, onClick }) {
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
         <div className="absolute bottom-0 left-1/3 w-16 h-16 rounded-full bg-white/10 blur-lg" />
         <div className="relative z-10 pr-14">
-          {/* Course name — large and prominent */}
+          
           <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 mb-1">
             {course.name}
           </h3>
-          {/* courseId as small subtitle */}
+        
           <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest">
             {course.courseId}
           </p>
@@ -242,7 +236,6 @@ function CourseCard({ course, index, dark, onClick }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Courses({ dark = false, instituteCourses = [] }) {
   const [courses, setCourses]               = useState(loadCourses);
@@ -260,7 +253,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     }
   }, [instituteCourses]);
 
-  // ── Polling: auto-unlock on teacher approval ──────────────────────────────
   const coursesRef = useRef(courses);
   coursesRef.current = courses;
 
@@ -294,7 +286,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
             myRecord?.status === "APPROVED";
 
           if (isApproved) {
-            // Fetch full course data so card + detail show real content immediately
             try {
               const fullRes = await fetch(
                 `${API}/api/courses/course/${encodeURIComponent(current[i].courseId)}`
@@ -308,7 +299,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
             }
             changed = true;
           }
-        } catch { /* retry next tick */ }
+        } catch { /* */ }
       }
 
       if (changed) {
@@ -320,7 +311,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     return () => clearInterval(interval);
   }, [courses]);
 
-  // ── Join class ────────────────────────────────────────────────────────────
   const handleJoinClass = async () => {
     const code = classCode.trim();
     if (code.length < 3) return;
@@ -357,7 +347,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     setLoading(false);
   };
 
-  // ── Open course detail ────────────────────────────────────────────────────
   const handleCourseClick = async (course) => {
     if (course.status === "pending") return;
     setSelectedCourse({ ...course, topics: buildTopics(course.subjects) });
@@ -368,7 +357,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
       if (data.success && data.course) {
         setSelectedCourse({ ...data.course, status: "approved", topics: buildTopics(data.course.subjects) });
       }
-    } catch { /* keep local data */ }
+    } catch { /*  */ }
   };
 
   const filtered = courses.filter((c) =>
@@ -381,9 +370,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   const themeFor = (courseId) =>
     COURSE_THEMES[courses.findIndex((c) => c.courseId === courseId) % COURSE_THEMES.length];
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // DETAIL VIEW
-  // ══════════════════════════════════════════════════════════════════════════
+
   if (selectedCourse) {
     const theme = themeFor(selectedCourse.courseId);
     const teacher = resolveTeacher(selectedCourse.classTeacher);
@@ -440,7 +427,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
           <div className="h-5" />
         </div>
 
-        {/* Course details card */}
+       
         <div
           className="rounded-2xl p-5"
           style={{
@@ -502,9 +489,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // MAIN LIST VIEW
-  // ══════════════════════════════════════════════════════════════════════════
+ 
   return (
     <div className="space-y-7">
 

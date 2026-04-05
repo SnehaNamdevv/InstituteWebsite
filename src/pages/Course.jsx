@@ -256,8 +256,8 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
       const data = await res.json();
 
       if (data.courses) {
-        setCourses(data.courses); // ✅ fresh data
-        saveCourses(data.courses); // ✅ update localStorage
+        setCourses(data.courses); 
+        saveCourses(data.courses); 
       }
     } catch (err) {
       console.log("Sync error:", err);

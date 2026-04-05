@@ -178,9 +178,7 @@ function CourseCard({ course, index, dark, onClick }) {
         </div>
       </div>
 
-      {/* Card body */}
       <div className="px-5 pt-8 pb-5">
-        {/* Teacher */}
         {teacher ? (
           <p className={`font-semibold text-sm ${dark ? "text-slate-200" : "text-gray-800"}`}>
             {teacher}
@@ -189,7 +187,7 @@ function CourseCard({ course, index, dark, onClick }) {
           <p className="text-sm opacity-30 italic">No teacher assigned</p>
         )}
 
-        {/* Description */}
+        
         {course.description && (
           <p className={`text-xs mt-1 line-clamp-2 opacity-50 ${dark ? "text-slate-300" : "text-gray-600"}`}>
             {course.description}

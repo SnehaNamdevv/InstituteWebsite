@@ -238,7 +238,7 @@ function CourseCard({ course, index, dark, onClick }) {
 
 
 export default function Courses({ dark = false, instituteCourses = [] }) {
-  const [courses, setCourses]               = useState(loadCourses);
+ const [courses, setCourses] = useState(() => loadCourses());
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [search, setSearch]                 = useState("");
   const [showJoinModal, setShowJoinModal]   = useState(false);
@@ -247,11 +247,27 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
   const [popup, setPopup]                   = useState(null);
 
   useEffect(() => {
-    if (instituteCourses?.length) {
-      setCourses(instituteCourses);
-      saveCourses(instituteCourses);
+  const syncWithBackend = async () => {
+    const studentId = getStudent()?.studentID;
+    if (!studentId) return;
+
+    try {
+      const res = await fetch(`${API}/student/my-courses/${studentId}`);
+      const data = await res.json();
+
+      if (data.courses) {
+        setCourses(data.courses); // ✅ fresh data
+        saveCourses(data.courses); // ✅ update localStorage
+      }
+    } catch (err) {
+      console.log("Sync error:", err);
     }
-  }, [instituteCourses]);
+  };
+
+  syncWithBackend();
+}, []);
+
+  
 
   const coursesRef = useRef(courses);
   coursesRef.current = courses;
@@ -309,7 +325,7 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [courses]);
+  }, []);
 
   const handleJoinClass = async () => {
     const code = classCode.trim();
@@ -701,189 +717,3 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
 }
 
 
-
-// import React, { useState, useEffect } from "react";
-// import { Lock } from "lucide-react";
-
-// export default function Courses() {
-//   const [courses, setCourses] = useState([]);
-//   const [code, setCode] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   // Load from localStorage
-//   useEffect(() => {
-//     const saved = JSON.parse(localStorage.getItem("courses")) || [];
-//     setCourses(saved);
-//   }, []);
-
-//   // 🔥 AUTO CHECK APPROVAL
-//   useEffect(() => {
-//     const interval = setInterval(async () => {
-//       const student = JSON.parse(localStorage.getItem("student"));
-//       const studentId = student?.studentID;
-//       if (!studentId) return;
-
-//       let updated = [...courses];
-//       let changed = false;
-
-//       for (let i = 0; i < updated.length; i++) {
-//         if (updated[i].status === "pending") {
-//           try {
-//             const res = await fetch(
-//               `https://institute-backend-0ncp.onrender.com/api/courses/course/${updated[i].courseId}/access/${studentId}`
-//             );
-
-//             if (res.status === 403) continue;
-
-//             const data = await res.json();
-
-//             // ✅ IMPORTANT FIX
-//             if (data.approvalStatus === "APPROVED") {
-//               updated[i].status = "approved";
-//               changed = true;
-//             }
-//           } catch (err) {
-//             console.log(err);
-//           }
-//         }
-//       }
-
-//       if (changed) {
-//         setCourses(updated);
-//         localStorage.setItem("courses", JSON.stringify(updated));
-//       }
-//     }, 5000);
-
-//     return () => clearInterval(interval);
-//   }, [courses]);
-
-//   // 🟣 JOIN CLASS
-//   const handleJoin = async () => {
-//     if (!code) return;
-
-//     setLoading(true);
-
-//     try {
-//       const student = JSON.parse(localStorage.getItem("student"));
-//       const studentId = student?.studentID;
-
-//       const res = await fetch(
-//         "https://institute-backend-0ncp.onrender.com/student/apply-course",
-//         {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({ courseId: code, studentId }),
-//         }
-//       );
-
-//       const data = await res.json();
-
-//       if (data.message === "Request sent to teacher") {
-//         const newCourse = {
-//           courseId: code,
-//           name: code,
-//           status: "pending",
-//         };
-
-//         const updated = [...courses, newCourse];
-//         setCourses(updated);
-//         localStorage.setItem("courses", JSON.stringify(updated));
-
-//         alert("Request Sent ✅");
-//       } else {
-//         alert(data.message);
-//       }
-//     } catch (err) {
-//       alert("Server error");
-//     }
-
-//     setLoading(false);
-//     setCode("");
-//   };
-
-//   // 🎯 UI
-//   return (
-//     <div style={{ padding: 20 }}>
-//       <h2>Join Course</h2>
-
-//       <input
-//         value={code}
-//         onChange={(e) => setCode(e.target.value)}
-//         placeholder="Enter Course Code"
-//         style={{ padding: 10, marginRight: 10 }}
-//       />
-
-//       <button onClick={handleJoin} disabled={loading}>
-//         {loading ? "Joining..." : "Join"}
-//       </button>
-
-//       <hr style={{ margin: "20px 0" }} />
-
-//       <h2>My Courses</h2>
-
-//       <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-//         {courses.map((course, i) => {
-//           const isLocked = course.status === "pending";
-
-//           return (
-//             <div
-//               key={i}
-//               style={{
-//                 width: 200,
-//                 padding: 15,
-//                 borderRadius: 10,
-//                 border: "1px solid #ddd",
-//                 position: "relative",
-//                 cursor: isLocked ? "not-allowed" : "pointer",
-//                 opacity: isLocked ? 0.6 : 1,
-//               }}
-//               onClick={() => {
-//                 if (!isLocked) {
-//                   alert("Course Opened 🎉");
-//                 }
-//               }}
-//             >
-//               {/* 🔒 LOCK OVERLAY */}
-//               {isLocked && (
-//                 <div
-//                   style={{
-//                     position: "absolute",
-//                     inset: 0,
-//                     background: "rgba(255,255,255,0.7)",
-//                     display: "flex",
-//                     alignItems: "center",
-//                     justifyContent: "center",
-//                     flexDirection: "column",
-//                   }}
-//                 >
-//                   <Lock />
-//                   <p>Pending</p>
-//                 </div>
-//               )}
-
-//               <h3>{course.name}</h3>
-
-//               {/* ✅ STATUS */}
-//               <span
-//                 style={{
-//                   padding: "4px 8px",
-//                   borderRadius: 6,
-//                   fontSize: 12,
-//                   background:
-//                     course.status === "pending"
-//                       ? "#facc15"
-//                       : "#4ade80",
-//                   color: "#000",
-//                 }}
-//               >
-//                 {course.status === "pending"
-//                   ? "Pending"
-//                   : "Approved"}
-//               </span>
-//             </div>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// }

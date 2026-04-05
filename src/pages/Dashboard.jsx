@@ -21,16 +21,9 @@ export default function Dashboard({ dark, toggleTheme }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
   const [rightOpen, setRightOpen] = useState(false);
+const [instituteCourses, setInstituteCourses] = useState([]);
 
-  const [instituteCourses, setInstituteCourses] = useState([]);
 
-  
-  useEffect(() => {
-    const savedCourses = localStorage.getItem("courses");
-    if (savedCourses) {
-      setInstituteCourses(JSON.parse(savedCourses));
-    }
-  }, []);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -42,6 +35,7 @@ export default function Dashboard({ dark, toggleTheme }) {
             <PerformanceChart dark={dark} />
           </>
         );
+
 
       case "Course":
         return (

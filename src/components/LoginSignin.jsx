@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 const API = "https://institute-backend-0ncp.onrender.com";
+
 function BlobBg() {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -1054,6 +1055,9 @@ if (mode === "signin") {
           </div>
         </div>
       </div>
+      
     </>
+
   );
+  
 }

@@ -22,7 +22,36 @@ export default function Dashboard({ dark, toggleTheme }) {
   const [activeSection, setActiveSection] = useState("Dashboard");
   const [rightOpen, setRightOpen] = useState(false);
 const [instituteCourses, setInstituteCourses] = useState([]);
+const [status, setStatus] = useState("none");
+const [myInstitute, setMyInstitute] = useState(null);
 
+const fetchInstituteStatus = async () => {
+  try {
+    const res = await fetch(
+      `https://institute-backend-0ncp.onrender.com/student/my-institute/${localStorage.getItem("studentId")}`
+    );
+
+    const data = await res.json();
+
+    if (data.request) {
+      setStatus(data.request.status); // pending / approved
+      setMyInstitute(data.institute || null);
+    } else {
+      setStatus("none");
+      setMyInstitute(null);
+    }
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+useEffect(() => {
+  fetchInstituteStatus();
+
+  const interval = setInterval(fetchInstituteStatus, 5000);
+
+  return () => clearInterval(interval);
+}, []);
 
 
   const renderContent = () => {
@@ -94,13 +123,14 @@ const [instituteCourses, setInstituteCourses] = useState([]);
       </div>
 
       {/* Right Panel */}
-      <RightPanel
-        dark={dark}
-        rightOpen={rightOpen}
-        setRightOpen={setRightOpen}
-        setInstituteCourses={setInstituteCourses}
-        setActiveSection={setActiveSection}
-      />
+     <RightPanel
+  dark={dark}
+  rightOpen={rightOpen}
+  setRightOpen={setRightOpen}
+  setActiveSection={setActiveSection}
+  status={status}
+  myInstitute={myInstitute}
+/>
     </div>
   );
 }

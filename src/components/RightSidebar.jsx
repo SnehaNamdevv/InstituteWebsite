@@ -49,9 +49,12 @@ export default function RightPanel({
       const data = await res.json();
 
       if (res.ok) {
-        setJoinStatus("success");
-        setJoinMessage("Request sent! Waiting for approval.");
-        setInstituteCode("");
+  setJoinStatus("success");
+  setJoinMessage("Request sent! Waiting for approval.");
+  setInstituteCode("");
+
+  fetchInstituteStatus(); // 🔥 best way
+
       } else {
         setJoinStatus("error");
         setJoinMessage(data.message || "Something went wrong.");

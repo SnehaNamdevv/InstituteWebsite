@@ -26,24 +26,40 @@ const [status, setStatus] = useState("none");
 const [myInstitute, setMyInstitute] = useState(null);
 
 const fetchInstituteStatus = async () => {
-  try {
-    const res = await fetch(
-      `https://institute-backend-0ncp.onrender.com/student/my-institute/${localStorage.getItem("studentId")}`
-    );
+  const student = JSON.parse(localStorage.getItem("student"));
+  if (!student || !student._id) {
+  console.log("Student ID missing");
+  return;
+}
+const studentId = student?._id;
 
-    const data = await res.json();
+// ❌ STOP if no studentId
+if (!studentId) {
+  console.log("No studentId मिला → API call skip");
+  return;
+}
 
-    if (data.request) {
-      setStatus(data.request.status); // pending / approved
-      setMyInstitute(data.institute || null);
-    } else {
-      setStatus("none");
-      setMyInstitute(null);
-    }
+try {
+  const res = await fetch(
+    `https://institute-backend-0ncp.onrender.com/student/my-institute/${studentId}`
+  );
 
-  } catch (err) {
-    console.log(err);
+  // ❌ अगर API fail हुई तो json मत पढ़ो
+  if (!res.ok) {
+    console.log("API error:", res.status);
+    return;
   }
+
+  const data = await res.json();
+
+  if (data.request) {
+    setStatus(data.request.status);
+    setMyInstitute(data.institute || null);
+  }
+
+} catch (err) {
+  console.log("Fetch error:", err);
+}
 };
 useEffect(() => {
   fetchInstituteStatus();
@@ -130,6 +146,7 @@ useEffect(() => {
   setActiveSection={setActiveSection}
   status={status}
   myInstitute={myInstitute}
+  fetchInstituteStatus={fetchInstituteStatus}
 />
     </div>
   );

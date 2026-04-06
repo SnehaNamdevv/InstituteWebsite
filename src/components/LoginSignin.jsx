@@ -158,9 +158,11 @@ if (mode === "signin") {
       return;
     }
 
-    // ✅ save token + student
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("student", JSON.stringify(data.student));
+   localStorage.setItem("token", data.token);
+localStorage.setItem("student", JSON.stringify(data.student));
+
+// ✅ ADD THIS LINE (MOST IMPORTANT)
+localStorage.setItem("studentId", data.student._id);
 
     setError(false);
     setMessage("Login successful. Redirecting...");
@@ -213,6 +215,7 @@ if (mode === "signin") {
 
           localStorage.setItem("auth", "true");
           localStorage.setItem("student", JSON.stringify(data.student));
+          localStorage.setItem("studentId", data.student._id);
 
           setTimeout(() => {
             navigate("/dashboard");

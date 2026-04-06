@@ -228,41 +228,34 @@ useEffect(() => {
             />
 
             <div className="flex gap-2">
-             <button
-  onClick={async () => {
-    try {
-      const res = await fetch(
-        "https://institute-backend-0ncp.onrender.com/student/apply-institute",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            instituteCode: instituteCode,
-            studentId: localStorage.getItem("studentId"), // or from auth
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Request sent for approval ✅");
-        setShowJoinInstituteModal(false);
-        setInstituteCode("");
-      } else {
-        alert(data.message || "Something went wrong ❌");
+           onClick={async () => {
+  try {
+    const res = await fetch(
+      "https://institute-backend-0ncp.onrender.com/student/apply-institute",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instituteCode,
+          studentId: localStorage.getItem("studentId"), // later replace with auth
+        }),
       }
+    );
 
-    } catch (err) {
-      console.log(err);
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Request sent! Wait for approval ⏳");
+    } else {
+      alert(data.message);
     }
-  }}
-  className="flex-1 py-2 bg-indigo-600 text-white rounded-lg"
->
-  Apply
-</button>
+
+  } catch (err) {
+    console.log(err);
+  }
+}}
 
               <button
                 onClick={() => setShowJoinInstituteModal(false)}

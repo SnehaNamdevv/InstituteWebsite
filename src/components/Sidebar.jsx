@@ -106,11 +106,17 @@ useEffect(() => {
 
       <div className="p-4 space-y-3">
 
-       
-        <div className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-xl p-4 text-center">
-          <div className="text-xs font-medium opacity-80 mb-1">🎓 Institute</div>
-          <div className="text-sm font-bold leading-snug">{instituteName}</div>
-        </div>
+       <div className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-xl p-4 text-center">
+  <div className="text-xs font-medium opacity-80 mb-1">🎓 Institute</div>
+
+  <div className="text-sm font-bold leading-snug">
+    {status === "approved"
+      ? institute?.name
+      : status === "pending"
+      ? "Approval Pending ⏳"
+      : "Not Joined"}
+  </div>
+</div>
 
         <div
           onClick={handleLogout}

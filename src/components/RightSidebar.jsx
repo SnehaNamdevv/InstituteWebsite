@@ -8,6 +8,7 @@ export default function RightPanel({
   setActiveSection,
   status,
   myInstitute,
+  fetchInstituteStatus 
 }) {
   const meetings = [
     { title: "Team Meeting", time: "10:30 AM", color: "bg-pink-500" },
@@ -24,46 +25,51 @@ export default function RightPanel({
   const [joinMessage, setJoinMessage] = useState("");
 
   const handleJoinInstitute = async () => {
-    if (!instituteCode.trim()) {
-      setJoinStatus("error");
-      setJoinMessage("Please enter an institute code.");
-      return;
-    }
+  const student = JSON.parse(localStorage.getItem("student"));
 
-    setJoinStatus("loading");
-    setJoinMessage("");
+  if (!student?._id) {
+    setJoinStatus("error");
+    setJoinMessage("Student not logged in properly.");
+    return;
+  }
 
-    try {
-      const res = await fetch(
-        "https://institute-backend-0ncp.onrender.com/student/apply-institute",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instituteCode,
-            studentId: localStorage.getItem("studentId"),
-          }),
-        }
-      );
+  if (!instituteCode.trim()) {
+    setJoinStatus("error");
+    setJoinMessage("Please enter an institute code.");
+    return;
+  }
 
-      const data = await res.json();
+  setJoinStatus("loading");
 
-      if (res.ok) {
-  setJoinStatus("success");
-  setJoinMessage("Request sent! Waiting for approval.");
-  setInstituteCode("");
-
-  fetchInstituteStatus(); // 🔥 best way
-
-      } else {
-        setJoinStatus("error");
-        setJoinMessage(data.message || "Something went wrong.");
+  try {
+    const res = await fetch(
+      "https://institute-backend-0ncp.onrender.com/student/apply-institute",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instituteCode,
+          studentId: student._id, // ✅ FIXED
+        }),
       }
-    } catch (err) {
+    );
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setJoinStatus("success");
+      setJoinMessage("Request sent! Waiting for approval.");
+      setInstituteCode("");
+      fetchInstituteStatus();
+    } else {
       setJoinStatus("error");
-      setJoinMessage("Network error. Please try again.");
+      setJoinMessage(data.message || "Something went wrong.");
     }
-  };
+  } catch (err) {
+    setJoinStatus("error");
+    setJoinMessage("Network error. Please try again.");
+  }
+};
 
   const bg = dark ? "bg-slate-800" : "bg-white";
   const panelBg = dark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-gray-200";

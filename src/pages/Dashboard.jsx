@@ -27,47 +27,42 @@ const [myInstitute, setMyInstitute] = useState(null);
 
 const fetchInstituteStatus = async () => {
   const student = JSON.parse(localStorage.getItem("student"));
+
+  console.log("Student from localStorage:", student);
+
   if (!student || !student._id) {
-  console.log("Student ID missing");
-  return;
-}
-const studentId = student?._id;
-
-// ❌ STOP if no studentId
-if (!studentId) {
-  console.log("No studentId मिला → API call skip");
-  return;
-}
-
-try {
-  const res = await fetch(
-    `https://institute-backend-0ncp.onrender.com/student/my-institute/${studentId}`
-  );
-
-  // ❌ अगर API fail हुई तो json मत पढ़ो
-  if (!res.ok) {
-    console.log("API error:", res.status);
+    console.log("❌ Student ID missing");
     return;
   }
 
-  const data = await res.json();
+  const studentId = student._id;
 
-  if (data.request) {
-    setStatus(data.request.status);
-    setMyInstitute(data.institute || null);
+  console.log("✅ Student ID:", studentId); // 👈 IMPORTANT
+
+  try {
+    const res = await fetch(
+      `https://institute-backend-0ncp.onrender.com/student/my-institute/${studentId}`
+    );
+
+    console.log("API Response Status:", res.status);
+
+    if (!res.ok) {
+      console.log("❌ API error:", res.status);
+      return;
+    }
+
+    const data = await res.json();
+    console.log("API Data:", data); // 👈 CHECK DATA
+
+    if (data.request) {
+      setStatus(data.request.status);
+      setMyInstitute(data.institute || null);
+    }
+
+  } catch (err) {
+    console.log("❌ Fetch error:", err);
   }
-
-} catch (err) {
-  console.log("Fetch error:", err);
-}
 };
-useEffect(() => {
-  fetchInstituteStatus();
-
-  const interval = setInterval(fetchInstituteStatus, 5000);
-
-  return () => clearInterval(interval);
-}, []);
 
 
   const renderContent = () => {

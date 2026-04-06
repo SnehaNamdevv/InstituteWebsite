@@ -959,31 +959,6 @@ localStorage.setItem("studentId", data.student._id);
   </select>
 </div>
 
-        {/* Institute */}
-        <div className={`form-group${focused === "inst" ? " is-focused" : ""}`}>
-          <label className="form-label">Institute</label>
-          <Select
-            placeholder="Search Institute..."
-            options={institutes.map((inst) => ({
-              value: inst.name,
-              label: `${inst.name} (${inst.city})`
-            }))}
-            value={
-              institutes
-                .map((inst) => ({
-                  value: inst.name,
-                  label: `${inst.name} (${inst.city})`
-                }))
-                .find((opt) => opt.value === form.instituteName)
-            }
-            onChange={(selected) =>
-              setForm({ ...form, instituteName: selected.value })
-            }
-            onFocus={() => setFocused("inst")}
-            onBlur={() => setFocused("")}
-            isSearchable
-          />
-        </div>
 
         <button type="submit" className="btn-main">Continue <ArrowRight /></button>
       </>

@@ -21,6 +21,36 @@ export default function Sidebar({ sidebarOpen, dark, activeSection, setActiveSec
     localStorage.removeItem("student");
     navigate("/login");
   };
+  const [institute, setInstitute] = useState(null);
+const [status, setStatus] = useState("none"); // none | pending | approved
+
+useEffect(() => {
+  const fetchInstituteStatus = async () => {
+    try {
+      const res = await fetch(
+        `https://institute-backend-0ncp.onrender.com/student/my-institute/${localStorage.getItem("studentId")}`
+      );
+
+      const data = await res.json();
+
+      if (data.request) {
+        setStatus(data.request.status); // pending / approved
+        setInstitute(data.institute || null);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchInstituteStatus();
+
+  // 🔥 AUTO REFRESH EVERY 5 SEC (REAL-TIME FEEL)
+  const interval = setInterval(fetchInstituteStatus, 5000);
+
+  return () => clearInterval(interval);
+
+}, []);
 
   const menu = [
     { name: "Dashboard", icon: LayoutDashboard },

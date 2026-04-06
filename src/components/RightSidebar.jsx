@@ -45,7 +45,36 @@ export default function RightPanel({
     { name: "React Dashboard UI", due: "Tomorrow" },
     { name: "Database ER Diagram", due: "2 Days" }
   ];
+const [institute, setInstitute] = useState(null);
+const [status, setStatus] = useState("none"); // none | pending | approved
 
+useEffect(() => {
+  const fetchInstituteStatus = async () => {
+    try {
+      const res = await fetch(
+        `https://institute-backend-0ncp.onrender.com/student/my-institute/${localStorage.getItem("studentId")}`
+      );
+
+      const data = await res.json();
+
+      if (data.request) {
+        setStatus(data.request.status); // pending / approved
+        setInstitute(data.institute || null);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchInstituteStatus();
+
+  // 🔥 AUTO REFRESH EVERY 5 SEC (REAL-TIME FEEL)
+  const interval = setInterval(fetchInstituteStatus, 5000);
+
+  return () => clearInterval(interval);
+
+}, []);
   return (
     <>
       {/* RIGHT PANEL */}
@@ -199,35 +228,41 @@ export default function RightPanel({
             />
 
             <div className="flex gap-2">
-              <button
-                onClick={async () => {
-                  try {
-                    const res = await fetch(
-                      `https://institute-backend-0ncp.onrender.com/api/courses/institute/${encodeURIComponent(instituteCode)}`
-                    );
+             <button
+  onClick={async () => {
+    try {
+      const res = await fetch(
+        "https://institute-backend-0ncp.onrender.com/student/apply-institute",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            instituteCode: instituteCode,
+            studentId: localStorage.getItem("studentId"), // or from auth
+          }),
+        }
+      );
 
-                    const data = await res.json();
+      const data = await res.json();
 
-                    console.log("Courses:", data);
+      if (res.ok) {
+        alert("Request sent for approval ✅");
+        setShowJoinInstituteModal(false);
+        setInstituteCode("");
+      } else {
+        alert(data.message || "Something went wrong ❌");
+      }
 
-                    setInstituteCourses(data.courses || []);
-
-                    // ✅ Save for reload
-                    localStorage.setItem("courses", JSON.stringify(data.courses || []));
-
-                    setActiveSection("Course");
-
-                    setShowJoinInstituteModal(false);
-                    setInstituteCode("");
-
-                  } catch (err) {
-                    console.log(err);
-                  }
-                }}
-                className="flex-1 py-2 bg-indigo-600 text-white rounded-lg"
-              >
-                Join
-              </button>
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className="flex-1 py-2 bg-indigo-600 text-white rounded-lg"
+>
+  Apply
+</button>
 
               <button
                 onClick={() => setShowJoinInstituteModal(false)}

@@ -40,19 +40,24 @@ export default function RightPanel({
   }
 
   setJoinStatus("loading");
+  console.log("Student from localStorage:", student);
 
   try {
     const res = await fetch(
-      "https://institute-backend-0ncp.onrender.com/student/apply-institute",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instituteCode,
-          studentId: student._id, // ✅ FIXED
-        }),
-      }
-    );
+  "https://institute-backend-0ncp.onrender.com/student/apply-institute",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", // ← important!
+    },
+    body: JSON.stringify({
+      instituteCode,
+      studentId: student.studentID,
+    }),
+  }
+);
+        
+      
 
     const data = await res.json();
 

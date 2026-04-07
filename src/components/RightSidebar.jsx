@@ -21,7 +21,7 @@ export default function RightPanel({
   ];
 
   const [instituteCode, setInstituteCode] = useState("");
-  const [joinStatus, setJoinStatus] = useState("idle"); // idle | loading | success | error
+  const [joinStatus, setJoinStatus] = useState("idle"); 
   const [joinMessage, setJoinMessage] = useState("");
 
   const handleJoinInstitute = async () => {
@@ -48,7 +48,7 @@ export default function RightPanel({
   {
     method: "POST",
     headers: {
-      "Content-Type": "application/json", // ← important!
+      "Content-Type": "application/json", 
     },
     body: JSON.stringify({
       instituteCode,

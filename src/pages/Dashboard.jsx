@@ -87,7 +87,7 @@ useEffect(() => {
         return <Help dark={dark} />;
 
       case "Setting":
-        return <Settings dark={dark} />;
+  return <Settings dark={dark} setActiveSection={setActiveSection} />;
 
       case "StudentPortfolio":
         return <StudentPortfolioCenter dark={dark} />;

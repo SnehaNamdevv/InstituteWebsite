@@ -2,7 +2,6 @@ import { useState } from "react";
 
 const steps = ["Personal Info", "Education", "Interests", "Achievements", "Links"];
 
-// ── Universal interest categories for ALL students ──
 const INTEREST_CATEGORIES = [
   {
     label: "🎨 Arts & Creative",
@@ -69,7 +68,7 @@ const handleSubmit = async () => {
   try {
     const formData = new FormData();
 
-    // ✅ Normal fields
+   
     Object.keys(form).forEach((key) => {
       if (
         key !== "avatar" &&
@@ -81,16 +80,16 @@ const handleSubmit = async () => {
       }
     });
 
-    // ✅ Interests
+   
     formData.append("interests", JSON.stringify(form.interests));
 
-    // ✅ Achievements (ONLY THIS)
+   
     const cleaned = form.achievements.filter(
       (a) => a.title || a.category || a.desc || a.year
     );
     formData.append("achievements", JSON.stringify(cleaned));
 
-    // ✅ Files
+    
     if (form.avatar) {
       formData.append("profileImg", form.avatar);
     }

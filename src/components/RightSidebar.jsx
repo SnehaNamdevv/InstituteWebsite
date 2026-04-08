@@ -82,7 +82,7 @@ export default function RightPanel({
   return (
     <div className={`
       fixed xl:static top-16 right-0 z-50
-      h-[calc(100vh-4rem)] w-80
+      h-[calc(106vh-4rem)] w-80
       transform transition-transform duration-300 ease-in-out
       ${rightOpen ? "translate-x-0" : "translate-x-full"}
       xl:translate-x-0

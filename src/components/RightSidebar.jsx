@@ -52,7 +52,7 @@ export default function RightPanel({
     },
     body: JSON.stringify({
       instituteCode,
-      studentId: student.studentID,
+      studentID: student.studentID,
     }),
   }
 );

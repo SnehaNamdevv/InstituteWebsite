@@ -233,7 +233,7 @@ localStorage.setItem("studentId", data.student._id);
 
     } catch (error) {
       console.log(error);
-      alert("Server Error");
+      
     }
   };
   const strength = p => {

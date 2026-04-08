@@ -224,18 +224,22 @@ function CourseCard({ course, index, dark, onClick }) {
 }
 
 
-function JoinModal({ dark, onClose, onJoin, myInstitute, status }) {
-  const [step, setStep]                   = useState(1); 
-  const [institutes, setInstitutes]       = useState([]);
-  const [fetchingInst, setFetchingInst]   = useState(true);
-  const [instError, setInstError]         = useState(null);
-  const [selectedInst, setSelectedInst]   = useState(null);
-  const [classCode, setClassCode]         = useState("");
-  const [loading, setLoading]             = useState(false);
-  const [dropOpen, setDropOpen]           = useState(false);
+function JoinModal({ 
+  dark, 
+  onClose, 
+  onJoin, 
+  myInstitute, 
+  status,
+  institutes,
+  fetchingInst
+}){
+ const [selectedInst, setSelectedInst] = useState(null);
+const [classCode, setClassCode] = useState("");
+const [loading, setLoading] = useState(false);
+const [dropOpen, setDropOpen] = useState(false);
+const [instError, setInstError] = useState(null);
 
-
-
+const [step, setStep] = useState(1);
   const handleNext = () => {
     if (!selectedInst) return;
     setStep(2);
@@ -495,37 +499,38 @@ export default function Courses({ dark = false,
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [loading, setLoading]           = useState(false);
   const [popup, setPopup]               = useState(null);
+const[institutes , setInstitutes]=useState(null);
+const[selectedInst , setSelectedInst]=useState(null);
+const [fetchingInst, setFetchingInst] = useState(true);
 
+//  const fetchCourses = async () => {
+//   const studentId = getStudent()?.studentID;
+//   if (!studentId) return;
 
+//   try {
+//     // const res = await fetch(`${API}/student/my-courses/${studentId}`);
 
- const fetchCourses = async () => {
-  const studentId = getStudent()?.studentID;
-  if (!studentId) return;
+//     if (!res.ok) {
+//       console.log("API ERROR:", res.status);
+//       setCourses([]); // avoid crash
+//       return;
+//     }
 
-  try {
-    const res = await fetch(`${API}/student/my-courses/${studentId}`);
+//     const data = await res.json();
 
-    if (!res.ok) {
-      console.log("API ERROR:", res.status);
-      setCourses([]); // avoid crash
-      return;
-    }
+//     if (data.success) {
+//       setCourses(data.courses);
+//     } else {
+//       setCourses([]);
+//     }
 
-    const data = await res.json();
-
-    if (data.success) {
-      setCourses(data.courses);
-    } else {
-      setCourses([]);
-    }
-
-  } catch (err) {
-    console.log("Course fetch error:", err);
-  }
-};
-useEffect(() => {
-  fetchCourses();
-}, []);
+//   } catch (err) {
+//     console.log("Course fetch error:", err);
+//   }
+// };
+// useEffect(() => {
+//   fetchCourses();
+// }, []);
 
   const coursesRef = useRef(courses);
   coursesRef.current = courses;
@@ -801,12 +806,14 @@ useEffect(() => {
 
       {/* Join Modal (2-step) */}
       {showJoinModal && (
-       <JoinModal
+      <JoinModal
   dark={dark}
   onClose={() => setShowJoinModal(false)}
   onJoin={handleJoinClass}
   myInstitute={myInstitute}
   status={status}
+  institutes={institutes}
+  fetchingInst={fetchingInst}
 />
       )}
 

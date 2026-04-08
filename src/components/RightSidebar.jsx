@@ -107,7 +107,7 @@ export default function RightPanel({
           {/* APPROVED */}
           {status === "approved" && myInstitute && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:text-black dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                 {myInstitute.logo ? (
                   <img
                     src={myInstitute.logo.startsWith("http")
@@ -117,7 +117,7 @@ export default function RightPanel({
                     alt={myInstitute.name}
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold text-black">
                     {myInstitute.name?.charAt(0)}
                   </div>
                 )}

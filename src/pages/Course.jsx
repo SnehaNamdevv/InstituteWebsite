@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Plus, BookOpen, ChevronLeft, FileText, Video,
   Link as LinkIcon, Search, Clock, Users, GraduationCap,
-  ChevronRight, Lock, X, CalendarDays, LayoutGrid,
+  ChevronRight, Lock, X, CalendarDays, LayoutGrid, Building2,
+  ChevronDown, CheckCircle2, Loader2,
 } from "lucide-react";
 
 
@@ -44,12 +45,7 @@ const getStudent = () => {
   catch { return {}; }
 };
 
-const saveCourses = (list) => localStorage.setItem("courses", JSON.stringify(list));
 
-const loadCourses = () => {
-  try { return JSON.parse(localStorage.getItem("courses")) || []; }
-  catch { return []; }
-};
 
 const formatDate = (iso) => {
   if (!iso) return null;
@@ -151,21 +147,17 @@ function CourseCard({ course, index, dark, onClick }) {
     >
       {isPending && <LockedOverlay dark={dark} />}
 
-      {/* Gradient banner — shows course NAME */}
       <div className={`relative h-36 bg-gradient-to-br ${theme.bg} p-5 overflow-hidden`}>
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
         <div className="absolute bottom-0 left-1/3 w-16 h-16 rounded-full bg-white/10 blur-lg" />
         <div className="relative z-10 pr-14">
-          
           <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 mb-1">
             {course.name}
           </h3>
-        
           <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest">
             {course.courseId}
           </p>
         </div>
-        {/* Initials avatar */}
         <div
           className="absolute bottom-[-20px] right-5 w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold shadow-lg z-20 transition-transform duration-300 group-hover:scale-110 select-none"
           style={{
@@ -187,14 +179,12 @@ function CourseCard({ course, index, dark, onClick }) {
           <p className="text-sm opacity-30 italic">No teacher assigned</p>
         )}
 
-        
         {course.description && (
           <p className={`text-xs mt-1 line-clamp-2 opacity-50 ${dark ? "text-slate-300" : "text-gray-600"}`}>
             {course.description}
           </p>
         )}
 
-        {/* Meta row */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
           {course.duration && (
             <span className={`flex items-center gap-1 text-xs opacity-50 ${dark ? "text-slate-300" : "text-gray-600"}`}>
@@ -213,7 +203,6 @@ function CourseCard({ course, index, dark, onClick }) {
           )}
         </div>
 
-        {/* Status badge */}
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-1.5">
             <div className={`w-2 h-2 rounded-full ${theme.dot}`} />
@@ -235,130 +224,377 @@ function CourseCard({ course, index, dark, onClick }) {
 }
 
 
-export default function Courses({ dark = false, instituteCourses = [] }) {
- const [courses, setCourses] = useState(() => loadCourses());
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [search, setSearch]                 = useState("");
-  const [showJoinModal, setShowJoinModal]   = useState(false);
-  const [classCode, setClassCode]           = useState("");
-  const [loading, setLoading]               = useState(false);
-  const [popup, setPopup]                   = useState(null);
+function JoinModal({ dark, onClose, onJoin, myInstitute, status }) {
+  const [step, setStep]                   = useState(1); 
+  const [institutes, setInstitutes]       = useState([]);
+  const [fetchingInst, setFetchingInst]   = useState(true);
+  const [instError, setInstError]         = useState(null);
+  const [selectedInst, setSelectedInst]   = useState(null);
+  const [classCode, setClassCode]         = useState("");
+  const [loading, setLoading]             = useState(false);
+  const [dropOpen, setDropOpen]           = useState(false);
 
-  useEffect(() => {
-  const syncWithBackend = async () => {
-    const studentId = getStudent()?.studentID;
-    if (!studentId) return;
 
-    try {
-      const res = await fetch(`${API}/student/my-courses/${studentId}`);
-      const data = await res.json();
 
-      if (data.courses) {
-        setCourses(data.courses); 
-        saveCourses(data.courses); 
-      }
-    } catch (err) {
-      console.log("Sync error:", err);
-    }
+  const handleNext = () => {
+    if (!selectedInst) return;
+    setStep(2);
   };
 
-  syncWithBackend();
-}, []);
+  const handleJoin = async () => {
+    const code = classCode.trim();
+    if (code.length < 3) return;
+    setLoading(true);
+    await onJoin(code, selectedInst);
+    setLoading(false);
+  };
 
-  
+  const instName = (inst) =>
+    inst?.instituteName || inst?.name || inst?.instituteId || "Unknown Institute";
+
+  return (
+    <Modal dark={dark} onClose={onClose}>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 pt-8 pb-10 relative overflow-hidden">
+        <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        >
+          <X size={15} className="text-white" />
+        </button>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-5">
+          {[1, 2].map((s) => (
+            <React.Fragment key={s}>
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  step >= s ? "bg-white text-violet-700" : "bg-white/20 text-white/60"
+                }`}
+              >
+                {step > s ? <CheckCircle2 size={14} /> : s}
+              </div>
+              {s < 2 && (
+                <div className={`flex-1 h-0.5 rounded-full transition-all duration-500 ${step > s ? "bg-white" : "bg-white/20"}`} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
+          {step === 1 ? <Building2 size={24} className="text-white" /> : <GraduationCap size={24} className="text-white" />}
+        </div>
+        <h3 className="text-white text-xl font-bold">
+          {step === 1 ? "Select Institute" : "Enter Course Code"}
+        </h3>
+        <p className="text-white/60 text-sm mt-1">
+          {step === 1
+            ? "Choose the institute for this course"
+            : `Joining via ${instName(selectedInst)}`}
+        </p>
+      </div>
+
+      {/* Body */}
+      <div className="px-7 py-6 -mt-4">
+
+        {/* ── STEP 1: Institute picker ── */}
+        {step === 1 && (
+          <>
+            {fetchingInst ? (
+              <div className="flex flex-col items-center py-8 gap-3">
+                <Loader2 size={28} className="text-violet-500 animate-spin" />
+                <p className={`text-sm opacity-50 ${dark ? "text-slate-300" : "text-gray-500"}`}>
+                  Loading your institutes…
+                </p>
+              </div>
+            ) : instError ? (
+              <div className="text-center py-6">
+                <p className="text-red-500 text-sm font-semibold">{instError}</p>
+              </div>
+            ) : !myInstitute || status !== "approved" ?  (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-3">
+                  <Building2 size={24} className="text-amber-500" />
+                </div>
+                <p className={`text-sm font-semibold ${dark ? "text-slate-200" : "text-gray-700"}`}>
+                  No approved institutes
+                </p>
+                <p className={`text-xs mt-1 opacity-50 ${dark ? "text-slate-400" : "text-gray-500"}`}>
+                  You don't have any approved institutes yet
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Custom dropdown */}
+                <div className="relative mb-5">
+                  <button
+                    onClick={() => setDropOpen((p) => !p)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl text-left transition-all duration-200 ${
+                      dark
+                        ? "bg-slate-800 border border-white/10 hover:border-violet-500/50"
+                        : "bg-gray-50 border border-gray-200 hover:border-violet-400"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                        <Building2 size={15} className="text-violet-600" />
+                      </div>
+                      <span className={`text-sm font-semibold truncate ${
+                        selectedInst
+                          ? (dark ? "text-slate-100" : "text-gray-800")
+                          : "text-gray-400"
+                      }`}>
+                        {selectedInst ? instName(selectedInst) : "Select an institute…"}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={`shrink-0 opacity-50 transition-transform duration-200 ${dropOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {dropOpen && (
+                    <div
+                      className="absolute top-full left-0 right-0 mt-2 rounded-2xl overflow-hidden shadow-xl z-50 animate-popIn"
+                      style={{
+                        background: dark ? "#1e293b" : "#fff",
+                        border: dark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e5e7eb",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {institutes.map((inst, i) => (
+                        <button
+                          key={inst.instituteId || i}
+                          onClick={() => { setSelectedInst(inst); setDropOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-150 ${
+                            selectedInst?.instituteId === inst.instituteId
+                              ? "bg-violet-50 text-violet-700"
+                              : dark
+                                ? "hover:bg-white/5 text-slate-200"
+                                : "hover:bg-gray-50 text-gray-800"
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                            selectedInst?.instituteId === inst.instituteId ? "bg-violet-100" : "bg-gray-100"
+                          }`}>
+                            <Building2 size={14} className={
+                              selectedInst?.instituteId === inst.instituteId ? "text-violet-600" : "text-gray-500"
+                            } />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold truncate">{instName(inst)}</p>
+                            {inst.instituteId && (
+                              <p className="text-[10px] opacity-40 uppercase tracking-wide">{inst.instituteId}</p>
+                            )}
+                          </div>
+                          {selectedInst?.instituteId === inst.instituteId && (
+                            <CheckCircle2 size={15} className="text-violet-500 ml-auto shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  disabled={!selectedInst}
+                  className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-violet-700 hover:to-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Continue →
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={onClose}
+              className={`w-full py-3 mt-2 rounded-2xl text-sm font-medium transition-colors ${dark ? "text-slate-400 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"}`}
+            >
+              Cancel
+            </button>
+          </>
+        )}
+
+        {/* ── STEP 2: Course code ── */}
+        {step === 2 && (
+          <>
+            {/* Selected institute chip */}
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl mb-5"
+              style={{
+                background: dark ? "rgba(124,58,237,0.12)" : "#f5f3ff",
+                border: dark ? "1px solid rgba(124,58,237,0.25)" : "1px solid #ede9fe",
+              }}
+            >
+              <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                <Building2 size={14} className="text-violet-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase tracking-wide text-violet-500 font-semibold opacity-70">Institute</p>
+                <p className={`text-sm font-bold truncate ${dark ? "text-violet-300" : "text-violet-700"}`}>
+                  {instName(selectedInst)}
+                </p>
+              </div>
+              <button
+                onClick={() => { setStep(1); setClassCode(""); }}
+                className="text-[10px] font-semibold text-violet-500 hover:text-violet-700 transition-colors shrink-0"
+              >
+                Change
+              </button>
+            </div>
+
+            <div
+              className="rounded-2xl overflow-hidden mb-5"
+              style={{
+                background: dark ? "#0f172a" : "#f9fafb",
+                border: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb",
+              }}
+            >
+              <input
+                type="text"
+                placeholder="e.g. COURSE-63071"
+                value={classCode}
+                onChange={(e) => setClassCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                className="w-full px-5 py-4 bg-transparent text-center text-xl font-mono font-bold tracking-[0.2em] outline-none placeholder-gray-300"
+                style={{ color: dark ? "#e2e8f0" : "#1e293b" }}
+                autoFocus
+              />
+            </div>
+
+            <button
+              onClick={handleJoin}
+              disabled={!classCode.trim() || loading}
+              className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-violet-700 hover:to-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {loading ? "Sending request..." : "Join Classroom"}
+            </button>
+            <button
+              onClick={() => { setStep(1); setClassCode(""); }}
+              className={`w-full py-3 mt-2 rounded-2xl text-sm font-medium transition-colors ${dark ? "text-slate-400 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"}`}
+            >
+              ← Back
+            </button>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+
+export default function Courses({ dark = false, 
+  instituteCourses = [],
+  myInstitute,
+  status }) {
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [search, setSearch]             = useState("");
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [popup, setPopup]               = useState(null);
+
+
+
+ const fetchCourses = async () => {
+  const studentId = getStudent()?.studentID;
+  if (!studentId) return;
+
+  try {
+    const res = await fetch(`${API}/student/my-courses/${studentId}`);
+
+    if (!res.ok) {
+      console.log("API ERROR:", res.status);
+      setCourses([]); // avoid crash
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+      setCourses(data.courses);
+    } else {
+      setCourses([]);
+    }
+
+  } catch (err) {
+    console.log("Course fetch error:", err);
+  }
+};
+useEffect(() => {
+  fetchCourses();
+}, []);
 
   const coursesRef = useRef(courses);
   coursesRef.current = courses;
 
-  useEffect(() => {
-    const hasPending = courses.some((c) => c.status === "pending");
-    if (!hasPending) return;
+ useEffect(() => {
+  // 🚀 direct dashboard data use karo (same as sidebar)
+  if (status && myInstitute) {
+    setInstitutes([
+      {
+        instituteName: myInstitute.name,
+        instituteId: myInstitute.code,
+        status: status,
+      },
+    ]);
 
-    const interval = setInterval(async () => {
-      const studentId = getStudent()?.studentID;
-      if (!studentId) return;
+    setSelectedInst({
+      instituteName: myInstitute.name,
+      instituteId: myInstitute.code,
+      status: status,
+    });
 
-      const current = [...coursesRef.current];
-      let changed = false;
+    setFetchingInst(false);
+  } else {
+    setInstitutes([]);
+    setFetchingInst(false);
+  }
+}, [myInstitute, status]);
 
-      for (let i = 0; i < current.length; i++) {
-        if (current[i].status !== "pending") continue;
 
-        try {
-          const res = await fetch(
-            `${API}/api/courses/course/${current[i].courseId}/access/${studentId}`
-          );
-          if (res.status === 403) continue;
-
-          const data = await res.json();
-          const myRecord = data.course?.enrolledStudents?.find(
-            (s) => s.studentId === studentId
-          );
-          const isApproved =
-            data.approvalStatus === "APPROVED" ||
-            data.access === true ||
-            myRecord?.status === "APPROVED";
-
-          if (isApproved) {
-            try {
-              const fullRes = await fetch(
-                `${API}/api/courses/course/${encodeURIComponent(current[i].courseId)}`
-              );
-              const fullData = await fullRes.json();
-              current[i] = fullData.success && fullData.course
-                ? { ...fullData.course, status: "approved" }
-                : { ...current[i], status: "approved" };
-            } catch {
-              current[i] = { ...current[i], status: "approved" };
-            }
-            changed = true;
-          }
-        } catch { /* */ }
-      }
-
-      if (changed) {
-        setCourses(current);
-        saveCourses(current);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleJoinClass = async () => {
-    const code = classCode.trim();
-    if (code.length < 3) return;
-    setLoading(true);
-
+  const handleJoinClass = async (code, institute) => {
     try {
       const studentId = getStudent()?.studentID;
-      if (!studentId) { alert("Please login again."); setLoading(false); return; }
+      if (!studentId) { alert("Please login again."); return; }
 
       if (courses.some((c) => c.courseId.toLowerCase() === code.toLowerCase())) {
-        setShowJoinModal(false); setClassCode(""); setPopup("duplicate"); setLoading(false); return;
+        setShowJoinModal(false);
+        setPopup("duplicate");
+        return;
       }
 
       const res = await fetch(`${API}/student/apply-course`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId: code, studentId }),
+        body: JSON.stringify({
+          courseId:    code,
+          studentId,
+          instituteId: institute?.instituteId || institute?.id,
+        }),
       });
       const data = await res.json();
 
       if (data.message === "Request sent to teacher") {
-        const newCourse = { courseId: code, name: code, status: "pending", subjects: [] };
-        const updated = [...courses, newCourse];
-        setCourses(updated);
-        saveCourses(updated);
-        setShowJoinModal(false); setClassCode(""); setPopup("success");
-      } else if (data.message?.toLowerCase().includes("already")) {
-        setShowJoinModal(false); setClassCode(""); setPopup("duplicate");
+  setShowJoinModal(false);
+  setPopup("success");
+
+  // 🔥 REFRESH FROM DB
+  fetchCourses();
+
+        
+      }else if (data.message?.toLowerCase().includes("already")) {
+        setShowJoinModal(false);
+        setPopup("duplicate");
       } else {
         alert(data.message || "Something went wrong.");
-        setShowJoinModal(false); setClassCode("");
+        setShowJoinModal(false);
       }
-    } catch { alert("Server error. Please try again."); }
-    setLoading(false);
+    } catch {
+      alert("Server error. Please try again.");
+    }
   };
 
   const handleCourseClick = async (course) => {
@@ -366,12 +602,12 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     setSelectedCourse({ ...course, topics: buildTopics(course.subjects) });
 
     try {
-      const res = await fetch(`${API}/api/courses/course/${encodeURIComponent(course.courseId)}`);
+      const res  = await fetch(`${API}/api/courses/course/${encodeURIComponent(course.courseId)}`);
       const data = await res.json();
       if (data.success && data.course) {
         setSelectedCourse({ ...data.course, status: "approved", topics: buildTopics(data.course.subjects) });
       }
-    } catch { /*  */ }
+    } catch { /* */ }
   };
 
   const filtered = courses.filter((c) =>
@@ -386,14 +622,13 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
 
 
   if (selectedCourse) {
-    const theme = themeFor(selectedCourse.courseId);
-    const teacher = resolveTeacher(selectedCourse.classTeacher);
+    const theme        = themeFor(selectedCourse.courseId);
+    const teacher      = resolveTeacher(selectedCourse.classTeacher);
     const studentCount = selectedCourse.enrolledStudents?.length ?? selectedCourse.students ?? 0;
-    const nextBatch = formatDate(selectedCourse.nextBatch);
+    const nextBatch    = formatDate(selectedCourse.nextBatch);
 
     return (
       <div className="space-y-5 animate-fadeIn">
-        {/* Hero card */}
         <div className="rounded-3xl overflow-hidden shadow-xl" style={{ background: dark ? "#1e293b" : "#fff" }}>
           <div className={`bg-gradient-to-br ${theme.bg} px-6 pt-6 pb-16 relative overflow-hidden`}>
             <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
@@ -404,32 +639,22 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
               <ChevronLeft size={18} /> Back to Courses
             </button>
             <div className="relative z-10">
-              {/* Prominent course name */}
-              <h2 className="text-white text-2xl font-bold leading-tight mb-1">
-                {selectedCourse.name}
-              </h2>
-              {/* courseId as small label */}
-              <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">
-                {selectedCourse.courseId}
-              </p>
-              {/* Description */}
+              <h2 className="text-white text-2xl font-bold leading-tight mb-1">{selectedCourse.name}</h2>
+              <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">{selectedCourse.courseId}</p>
               {selectedCourse.description && (
-                <p className="text-white/65 text-sm mt-2 leading-relaxed">
-                  {selectedCourse.description}
-                </p>
+                <p className="text-white/65 text-sm mt-2 leading-relaxed">{selectedCourse.description}</p>
               )}
             </div>
           </div>
 
-          {/* Stats bar */}
           <div
             className="grid grid-cols-3 divide-x -mt-6 mx-6 rounded-2xl overflow-hidden shadow-lg z-10 relative"
             style={{ background: dark ? "#0f172a" : "#fff" }}
           >
             {[
-              { icon: BookOpen,    label: "Subjects",  value: selectedCourse.topics?.length || 0 },
-              { icon: Clock,       label: "Duration",  value: selectedCourse.duration || "N/A"   },
-              { icon: Users,       label: "Enrolled",  value: studentCount                        },
+              { icon: BookOpen, label: "Subjects", value: selectedCourse.topics?.length || 0 },
+              { icon: Clock,    label: "Duration", value: selectedCourse.duration || "N/A"   },
+              { icon: Users,    label: "Enrolled", value: studentCount                        },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex flex-col items-center py-4 gap-1">
                 <Icon size={16} className="text-violet-500 opacity-70" />
@@ -441,7 +666,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
           <div className="h-5" />
         </div>
 
-       
         <div
           className="rounded-2xl p-5"
           style={{
@@ -454,10 +678,8 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
           </h4>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Teacher",    value: teacher || "Not assigned",            icon: GraduationCap },
-              
-              { label: "Next Batch", value: nextBatch || "N/A",                   icon: CalendarDays  },
-             ,
+              { label: "Teacher",    value: teacher || "Not assigned", icon: GraduationCap },
+              { label: "Next Batch", value: nextBatch || "N/A",        icon: CalendarDays  },
             ].map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
@@ -476,12 +698,9 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
           </div>
         </div>
 
-        {/* Subjects list */}
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className={`text-base font-bold ${dark ? "text-slate-200" : "text-gray-700"}`}>
-              Subjects
-            </h3>
+            <h3 className={`text-base font-bold ${dark ? "text-slate-200" : "text-gray-700"}`}>Subjects</h3>
             <span className={`text-xs font-semibold opacity-40 ${dark ? "text-slate-300" : "text-gray-500"}`}>
               {selectedCourse.topics?.length || 0} total
             </span>
@@ -503,7 +722,6 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     );
   }
 
- 
   return (
     <div className="space-y-7">
 
@@ -581,57 +799,15 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
         )}
       </div>
 
-      {/* Join Modal */}
+      {/* Join Modal (2-step) */}
       {showJoinModal && (
-        <Modal dark={dark} onClose={() => { setShowJoinModal(false); setClassCode(""); }}>
-          <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 pt-8 pb-10 relative overflow-hidden">
-            <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10 blur-xl" />
-            <button
-              onClick={() => { setShowJoinModal(false); setClassCode(""); }}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            >
-              <X size={15} className="text-white" />
-            </button>
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
-              <GraduationCap size={24} className="text-white" />
-            </div>
-            <h3 className="text-white text-xl font-bold">Join a Classroom</h3>
-            <p className="text-white/60 text-sm mt-1">Enter the code from your instructor</p>
-          </div>
-          <div className="px-7 py-6 -mt-4">
-            <div
-              className="rounded-2xl overflow-hidden mb-5"
-              style={{
-                background: dark ? "#0f172a" : "#f9fafb",
-                border: dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="e.g. COURSE-63071"
-                value={classCode}
-                onChange={(e) => setClassCode(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === "Enter" && handleJoinClass()}
-                className="w-full px-5 py-4 bg-transparent text-center text-xl font-mono font-bold tracking-[0.2em] outline-none placeholder-gray-300"
-                style={{ color: dark ? "#e2e8f0" : "#1e293b" }}
-                autoFocus
-              />
-            </div>
-            <button
-              onClick={handleJoinClass}
-              disabled={!classCode.trim() || loading}
-              className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:from-violet-700 hover:to-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {loading ? "Sending request..." : "Join Classroom"}
-            </button>
-            <button
-              onClick={() => { setShowJoinModal(false); setClassCode(""); }}
-              className={`w-full py-3 mt-2 rounded-2xl text-sm font-medium transition-colors ${dark ? "text-slate-400 hover:bg-white/5" : "text-gray-500 hover:bg-gray-50"}`}
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal>
+       <JoinModal
+  dark={dark}
+  onClose={() => setShowJoinModal(false)}
+  onJoin={handleJoinClass}
+  myInstitute={myInstitute}
+  status={status}
+/>
       )}
 
       {/* Success popup */}
@@ -713,5 +889,3 @@ export default function Courses({ dark = false, instituteCourses = [] }) {
     </div>
   );
 }
-
-

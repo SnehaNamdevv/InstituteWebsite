@@ -68,7 +68,12 @@ useEffect(() => {
 
       case "Course":
         return (
-          <Course dark={dark} instituteCourses={instituteCourses} />
+          <Course 
+  dark={dark} 
+  instituteCourses={instituteCourses} 
+  myInstitute={myInstitute}
+  status={status}
+/>
         );
 
       case "Profile":

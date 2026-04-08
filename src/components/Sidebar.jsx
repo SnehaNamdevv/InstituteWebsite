@@ -91,7 +91,7 @@ export default function Sidebar({
     ? `🎓 ${institute.name}`
     : status === "pending"
     ? institute?.name 
-        ? `⏳ ${institute.name}`   // ✅ better UX
+        ? `⏳ ${institute.name}`   
         : "Approval Pending ⏳"
     : "Not Joined"}
 </div>

@@ -61,7 +61,7 @@ export default function StudentPortfolioForm({ dark = false }) {
  const handleAddharImage = (e) => {
   const file = e.target.files[0];
   if (file) {
-    update("addharImage", file); // store real file
+    update("addharImage", file); 
   }
 };
 const handleSubmit = async () => {

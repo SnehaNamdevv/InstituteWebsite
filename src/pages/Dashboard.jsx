@@ -52,7 +52,7 @@ const fetchInstituteStatus = async () => {
     }
 
     const data = await res.json();
-    console.log("API Data:", data); // 👈 CHECK DATA
+    console.log("API Data:", data); 
 
     if (data.request) {
       setStatus(data.request.status);

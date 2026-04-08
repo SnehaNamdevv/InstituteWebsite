@@ -28,42 +28,31 @@ const [myInstitute, setMyInstitute] = useState(null);
 const fetchInstituteStatus = async () => {
   const student = JSON.parse(localStorage.getItem("student"));
 
-  console.log("Student from localStorage:", student);
-
-  if (!student || !student._id) {
-    console.log("❌ Student ID missing");
-    return;
-  }
-
-  const studentId = student._id;
-
-  console.log("✅ Student ID:", studentId); // 👈 IMPORTANT
+  if (!student || !student.studentID) return;
 
   try {
     const res = await fetch(
-      `https://institute-backend-0ncp.onrender.com/student/my-institute/${studentId}`
+      `https://institute-backend-0ncp.onrender.com/student/institute-status/${student.studentID}`
     );
 
-    console.log("API Response Status:", res.status);
-
-    if (!res.ok) {
-      console.log("❌ API error:", res.status);
-      return;
-    }
+    if (!res.ok) return;
 
     const data = await res.json();
-    console.log("API Data:", data); 
 
-    if (data.request) {
-      setStatus(data.request.status);
-      setMyInstitute(data.institute || null);
-    }
+    setStatus(data.status);
+    setMyInstitute({
+      name: data.instituteName,
+      code: data.instituteCode,
+    });
 
   } catch (err) {
-    console.log("❌ Fetch error:", err);
+    console.log(err);
   }
 };
 
+useEffect(() => {
+  fetchInstituteStatus();
+}, []);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -116,6 +105,8 @@ const fetchInstituteStatus = async () => {
         dark={dark}
         activeSection={activeSection}
         setActiveSection={setActiveSection}
+        institute={myInstitute}
+        status={status}              
       />
 
       <div className="flex flex-1 flex-col">

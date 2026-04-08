@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import {
   LayoutDashboard,
   MessageCircle,
@@ -83,17 +84,17 @@ export default function Sidebar({
       <div className="p-4 space-y-3">
         {/* 🎓 INSTITUTE CARD */}
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-xl p-4 text-center">
-          <div className="text-xs font-medium opacity-80 mb-1">
-            🎓 Institute
-          </div>
+         
 
-          <div className="text-sm font-bold leading-snug">
-            {status === "approved" && institute
-              ? `🎓 ${institute.name}`
-              : status === "pending"
-              ? "Approval Pending ⏳"
-              : "Not Joined"}
-          </div>
+      <div className="text-sm font-bold leading-snug">
+  {status === "approved" && institute
+    ? `🎓 ${institute.name}`
+    : status === "pending"
+    ? institute?.name 
+        ? `⏳ ${institute.name}`   // ✅ better UX
+        : "Approval Pending ⏳"
+    : "Not Joined"}
+</div>
         </div>
 
         {/* LOGOUT */}

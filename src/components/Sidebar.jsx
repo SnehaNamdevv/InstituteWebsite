@@ -80,9 +80,9 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* BOTTOM SECTION */}
+    
       <div className="p-4 space-y-3">
-        {/* 🎓 INSTITUTE CARD */}
+       
         <div className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded-xl p-4 text-center">
          
 

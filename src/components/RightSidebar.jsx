@@ -117,14 +117,18 @@ export default function RightPanel({
                     alt={myInstitute.name}
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold text-black">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500  flex items-center justify-center text-white text-sm font-semibold text-black">
                     {myInstitute.name?.charAt(0)}
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{myInstitute.name}</p>
-                  <p className="text-xs opacity-60 truncate">{myInstitute.city}</p>
-                </div>
+               <div className="flex-1 min-w-0">
+  <p className="font-medium text-sm truncate text-gray-800 dark:text-white">
+    {myInstitute.name}
+  </p>
+  <p className="text-xs truncate text-gray-600 dark:text-gray-300">
+    {myInstitute.city}
+  </p>
+</div>
                 <CheckCircle size={18} className="text-green-500 shrink-0" />
               </div>
               <p className="text-xs text-center opacity-50">You are enrolled in this institute</p>
@@ -150,7 +154,7 @@ export default function RightPanel({
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{myInstitute.name}</p>
+                    <p className="font-medium text-sm truncate dark:text-white">{myInstitute.name}</p>
                     <p className="text-xs opacity-60 truncate">{myInstitute.city}</p>
                   </div>
                   <Clock size={18} className="text-yellow-500 shrink-0" />

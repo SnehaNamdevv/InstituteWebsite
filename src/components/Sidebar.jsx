@@ -53,7 +53,7 @@ export default function Sidebar({
       flex flex-col justify-between
     `}
     >
-      {/* TOP SECTION */}
+     
       <div>
         <div className="px-6 py-6 text-lg font-semibold">Classroom</div>
 
@@ -97,7 +97,7 @@ export default function Sidebar({
 </div>
         </div>
 
-        {/* LOGOUT */}
+       
         <div
           onClick={handleLogout}
           className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer

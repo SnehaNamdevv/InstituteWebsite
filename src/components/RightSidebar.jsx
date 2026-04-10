@@ -1,14 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Building2, Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default function RightPanel({
   dark,
   rightOpen,
   setRightOpen,
-  setActiveSection,
-  status,
-  myInstitute,
-  fetchInstituteStatus 
+  setActiveSection
 }) {
   const meetings = [
     { title: "Team Meeting", time: "10:30 AM", color: "bg-pink-500" },
@@ -20,67 +17,110 @@ export default function RightPanel({
     { name: "Database ER Diagram", due: "2 Days" },
   ];
 
+  const [institutes, setInstitutes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [instituteCode, setInstituteCode] = useState("");
-  const [joinStatus, setJoinStatus] = useState("idle"); 
+  const [joinStatus, setJoinStatus] = useState("idle");
   const [joinMessage, setJoinMessage] = useState("");
 
-  const handleJoinInstitute = async () => {
   const student = JSON.parse(localStorage.getItem("student"));
 
-  if (!student?._id) {
-    setJoinStatus("error");
-    setJoinMessage("Student not logged in properly.");
-    return;
-  }
+  // 🔥 FETCH INSTITUTES
+  const fetchInstitutes = async () => {
+    try {
+      const res = await fetch(
+        `https://institute-backend-0ncp.onrender.com/student/student-institutes/${student?.studentID}`
+      );
+      const data = await res.json();
 
-  if (!instituteCode.trim()) {
-    setJoinStatus("error");
-    setJoinMessage("Please enter an institute code.");
-    return;
-  }
+      console.log("Institutes:", data); // DEBUG
 
-  setJoinStatus("loading");
-  console.log("Student from localStorage:", student);
-
-  try {
-    const res = await fetch(
-  "https://institute-backend-0ncp.onrender.com/student/apply-institute",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", 
-    },
-    body: JSON.stringify({
-      instituteCode,
-      studentID: student.studentID,
-    }),
-  }
-);
-        
-      
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setJoinStatus("success");
-      setJoinMessage("Request sent! Waiting for approval.");
-      setInstituteCode("");
-      fetchInstituteStatus();
-    } else {
-      setJoinStatus("error");
-      setJoinMessage(data.message || "Something went wrong.");
+      if (data.success) {
+        setInstitutes(data.institutes || []);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setJoinStatus("error");
-    setJoinMessage("Network error. Please try again.");
-  }
-};
+  };
+
+  useEffect(() => {
+    if (student?.studentID) {
+      fetchInstitutes();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  // 🔥 APPLY INSTITUTE
+  const handleJoinInstitute = async () => {
+    if (!student?.studentID) {
+      setJoinStatus("error");
+      setJoinMessage("Student not found.");
+      return;
+    }
+
+    if (!instituteCode.trim()) {
+      setJoinStatus("error");
+      setJoinMessage("Please enter an institute code.");
+      return;
+    }
+
+    setJoinStatus("loading");
+
+    try {
+      const res = await fetch(
+        "https://institute-backend-0ncp.onrender.com/student/apply-institute",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            instituteCode,
+            studentID: student.studentID,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setJoinStatus("success");
+        setJoinMessage("Request sent! Waiting for approval.");
+        setInstituteCode("");
+        fetchInstitutes();
+      } else {
+        setJoinStatus("error");
+        setJoinMessage(data.message || "Something went wrong.");
+      }
+    } catch {
+      setJoinStatus("error");
+      setJoinMessage("Network error. Please try again.");
+    }
+  };
+
+  // 🔥 SAFE FILTERS
+  const approved = institutes.filter(
+    (i) => i.status?.toUpperCase() === "APPROVED"
+  );
+
+  const pending = institutes.filter(
+    (i) => i.status?.toUpperCase() === "PENDING"
+  );
+
+  const rejected = institutes.filter(
+    (i) => i.status?.toUpperCase() === "REJECTED"
+  );
 
   const bg = dark ? "bg-slate-800" : "bg-white";
-  const panelBg = dark ? "bg-slate-900 border-slate-800 text-white" : "bg-white border-gray-200";
+  const panelBg = dark
+    ? "bg-slate-900 border-slate-800 text-white"
+    : "bg-white border-gray-200";
 
   return (
-    <div className={`
+    <div
+      className={`
       fixed xl:static top-16 right-0 z-50
       h-[calc(106vh-4rem)] w-80
       transform transition-transform duration-300 ease-in-out
@@ -88,15 +128,15 @@ export default function RightPanel({
       xl:translate-x-0
       flex flex-col border-l shadow-2xl
       ${panelBg}
-    `}>
-
-      {/* Close button mobile */}
+    `}
+    >
+      {/* Close button */}
       <div className="flex justify-end xl:hidden p-4">
         <button onClick={() => setRightOpen(false)}>❌</button>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
-
+        
         {/* ── INSTITUTE CARD ── */}
         <div className={`rounded-xl p-4 shadow ${bg}`}>
           <div className="flex items-center gap-2 mb-4">
@@ -104,119 +144,83 @@ export default function RightPanel({
             <h3 className="font-semibold">My Institute</h3>
           </div>
 
-          {/* APPROVED */}
-          {status === "approved" && myInstitute && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:text-black dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                {myInstitute.logo ? (
-                  <img
-                    src={myInstitute.logo.startsWith("http")
-                      ? myInstitute.logo
-                      : `https://institute-backend-0ncp.onrender.com/uploads/${myInstitute.logo}`}
-                    className="w-10 h-10 rounded-full object-cover"
-                    alt={myInstitute.name}
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-500  flex items-center justify-center text-white text-sm font-semibold text-black">
-                    {myInstitute.name?.charAt(0)}
+          {/* LOADING */}
+          {loading && (
+            <div className="flex justify-center">
+              <Loader2 className="animate-spin" />
+            </div>
+          )}
+
+          {/* APPROVED LIST */}
+          {!loading && (
+            <div className="space-y-2 mb-3">
+              {approved.map((inst, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-2 rounded-lg bg-green-100 dark:bg-green-900/20"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{inst.name}</p>
+                    <p className="text-xs opacity-60">{inst.city}</p>
                   </div>
-                )}
-               <div className="flex-1 min-w-0">
-  <p className="font-medium text-sm truncate text-gray-800 dark:text-white">
-    {myInstitute.name}
-  </p>
-  <p className="text-xs truncate text-gray-600 dark:text-gray-300">
-    {myInstitute.city}
-  </p>
-</div>
-                <CheckCircle size={18} className="text-green-500 shrink-0" />
-              </div>
-              <p className="text-xs text-center opacity-50">You are enrolled in this institute</p>
+                  <CheckCircle size={16} className="text-green-500" />
+                </div>
+              ))}
+
+              {approved.length === 0 && (
+                <p className="text-xs opacity-60">
+                  No approved institute
+                </p>
+              )}
             </div>
           )}
 
           {/* PENDING */}
-          {status === "pending" && (
-            <div className="space-y-3">
-              {myInstitute && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-                  {myInstitute.logo ? (
-                    <img
-                      src={myInstitute.logo.startsWith("http")
-                        ? myInstitute.logo
-                        : `https://institute-backend-0ncp.onrender.com/uploads/${myInstitute.logo}`}
-                      className="w-10 h-10 rounded-full object-cover"
-                      alt={myInstitute.name}
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white text-sm font-semibold">
-                      {myInstitute.name?.charAt(0)}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate dark:text-white">{myInstitute.name}</p>
-                    <p className="text-xs opacity-60 truncate">{myInstitute.city}</p>
-                  </div>
-                  <Clock size={18} className="text-yellow-500 shrink-0" />
-                </div>
-              )}
-              <div className="flex items-center gap-2 justify-center text-xs text-yellow-600 dark:text-yellow-400">
-                <Loader2 size={12} className="animate-spin" />
-                Waiting for institute approval...
-              </div>
+          {pending.map((inst, i) => (
+            <div key={i} className="mb-2 flex items-center justify-between p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/20">
+              <span className="text-sm">{inst.name}</span>
+              <Clock size={16} className="text-yellow-500" />
             </div>
-          )}
+          ))}
 
-          {/* NOT JOINED — show code input */}
-          {status === "none" && (
-            <div className="space-y-3">
-              <p className="text-xs opacity-60 mb-2">
-                Enter the code shared by your institute owner to send a join request.
-              </p>
-
-              <input
-                type="text"
-                placeholder="e.g. INST-2024-XY"
-                value={instituteCode}
-                onChange={(e) => {
-                  setInstituteCode(e.target.value);
-                  setJoinStatus("idle");
-                  setJoinMessage("");
-                }}
-                onKeyDown={(e) => e.key === "Enter" && handleJoinInstitute()}
-                className={`w-full px-3 py-2.5 text-sm border rounded-lg outline-none transition
-                  focus:ring-2 focus:ring-indigo-400
-                  ${dark
-                    ? "bg-slate-900 border-slate-600 text-white placeholder:text-slate-500"
-                    : "bg-gray-50 border-gray-200 placeholder:text-gray-400"
-                  }`}
-              />
-
-              {/* Feedback message */}
-              {joinMessage && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg
-                  ${joinStatus === "success"
-                    ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                    : "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-                  }`}>
-                  {joinStatus === "success"
-                    ? <CheckCircle size={12} />
-                    : <XCircle size={12} />}
-                  {joinMessage}
-                </div>
-              )}
-
-              <button
-                onClick={handleJoinInstitute}
-                disabled={joinStatus === "loading" || joinStatus === "success"}
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50
-                  text-white text-sm font-medium rounded-lg transition flex items-center justify-center gap-2"
-              >
-                {joinStatus === "loading" && <Loader2 size={14} className="animate-spin" />}
-                {joinStatus === "loading" ? "Sending..." : "Send Join Request"}
-              </button>
+          {/* REJECTED */}
+          {rejected.map((inst, i) => (
+            <div key={i} className="mb-2 flex items-center justify-between p-2 rounded-lg bg-red-100 dark:bg-red-900/20">
+              <span className="text-sm">{inst.name}</span>
+              <XCircle size={16} className="text-red-500" />
             </div>
-          )}
+          ))}
+
+          {/* APPLY */}
+          <div className="mt-4 border-t pt-3">
+            <p className="text-xs opacity-60 mb-2">
+              Enter institute code to join
+            </p>
+
+            <input
+              type="text"
+              value={instituteCode}
+              onChange={(e) => {
+                setInstituteCode(e.target.value);
+                setJoinStatus("idle");
+                setJoinMessage("");
+              }}
+              className="w-full px-3 py-2 border rounded"
+              placeholder="Enter code..."
+            />
+
+            <button
+              onClick={handleJoinInstitute}
+              disabled={joinStatus === "loading"}
+              className="w-full mt-2 py-2 bg-indigo-600 text-white rounded"
+            >
+              {joinStatus === "loading" ? "Sending..." : "Join Institute"}
+            </button>
+
+            {joinMessage && (
+              <div className="text-xs mt-2">{joinMessage}</div>
+            )}
+          </div>
         </div>
 
         {/* ── SCHEDULE ── */}

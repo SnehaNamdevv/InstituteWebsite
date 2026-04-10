@@ -51,7 +51,13 @@ const fetchInstituteStatus = async () => {
 };
 
 useEffect(() => {
-  fetchInstituteStatus();
+  fetchInstituteStatus(); 
+
+  const interval = setInterval(() => {
+    fetchInstituteStatus(); 
+  }, 5000);
+
+  return () => clearInterval(interval);
 }, []);
 
   const renderContent = () => {

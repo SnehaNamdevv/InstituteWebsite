@@ -100,7 +100,7 @@ export default function RightPanel({
     }
   };
 
-  // 🔥 SAFE FILTERS
+  
   const approved = institutes.filter(
     (i) => i.status?.toUpperCase() === "APPROVED"
   );
